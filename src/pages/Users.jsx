@@ -103,7 +103,7 @@ const UsersPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     role: "Student",
     phone: "",
@@ -140,7 +140,6 @@ const UsersPage = () => {
     }
   };
 
-  // Dynamic fetching (polling)
   useEffect(() => {
     const fetchData = async () => {
       await fetchUsers();
@@ -148,9 +147,7 @@ const UsersPage = () => {
     };
 
     fetchData(); // initial fetch
-
     const interval = setInterval(fetchData, 5000); // fetch every 5 seconds
-
     return () => clearInterval(interval);
   }, []);
 
@@ -158,7 +155,7 @@ const UsersPage = () => {
   const handleAdd = () => {
     setEditingUser(null);
     setFormData({
-      name: "",
+      fullName: "",
       email: "",
       role: "Student",
       phone: "",
@@ -178,7 +175,7 @@ const UsersPage = () => {
   const handleEdit = (user) => {
     setEditingUser(user);
     setFormData({
-      name: user.fullName || "",
+      fullName: user.fullName || "",
       email: user.email || "",
       role: user.role || "Student",
       phone: user.phone || "",
@@ -222,7 +219,6 @@ const UsersPage = () => {
       console.error(error);
       alert("Failed to delete user!");
     }
-    
   };
 
   // Reset password
@@ -241,12 +237,20 @@ const UsersPage = () => {
   // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Password match check for new user
     if (!editingUser && formData.password !== formData.confirmPassword) {
       return alert("Passwords do not match!");
     }
+
+    // Phone required check
+    if (!formData.phone) {
+      return alert("Phone number is required!");
+    }
+
     try {
       const payload = {
-        fullName: formData.name,
+        fullName: formData.fullName,
         email: formData.email,
         role: formData.role,
         phone: formData.phone,
@@ -258,6 +262,7 @@ const UsersPage = () => {
         gender: formData.gender,
         selectDate: formData.selectDate,
       };
+
       if (!editingUser) payload.password = formData.password;
 
       if (editingUser) {
@@ -267,15 +272,15 @@ const UsersPage = () => {
         await createUser(payload);
         alert("User created successfully!");
       }
+
       setFormVisible(false);
       fetchUsers();
     } catch (error) {
       console.error(error);
-      alert("Failed to save user!");
+      alert(error.response?.data?.message || "Failed to save user!");
     }
   };
 
-  // Get course names
   const getCourseNames = (userCourses) => {
     if (!Array.isArray(userCourses)) return [];
     return userCourses
@@ -283,7 +288,6 @@ const UsersPage = () => {
       .filter(Boolean);
   };
 
-  // Filtered users
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
       const courseTitles = getCourseNames(user.courses).join(" ").toLowerCase();
@@ -391,7 +395,7 @@ const UsersPage = () => {
             <h3>{editingUser ? "Edit User" : "Add New User"}</h3>
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "12px" }}>
               <label>Full Name</label>
-              <input name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+              <input name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} required style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
               <label>Email</label>
               <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
               {!editingUser && (
@@ -403,7 +407,9 @@ const UsersPage = () => {
                 </>
               )}
               <label>Phone No</label>
-              <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+              <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} required style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
+
+              {/* Rest of the fields */}
               <label>Address</label>
               <input name="address" placeholder="Address" value={formData.address} onChange={handleChange} style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }} />
               <label>Country</label>
@@ -451,15 +457,15 @@ const UsersPage = () => {
           </Modal>
         )}
 
-        {/* User Details Modal */}
+        {/* Show Details Modal */}
         {selectedUser && (
           <Modal onClose={handleCloseDetails}>
             <h3>User Details</h3>
-            <p><strong>Name:</strong> {selectedUser.fullName}</p>
+            <p><strong>Full Name:</strong> {selectedUser.fullName}</p>
             <p><strong>Email:</strong> {selectedUser.email}</p>
+            <p><strong>Phone:</strong> {selectedUser.phone}</p>
             <p><strong>Role:</strong> {selectedUser.role}</p>
             <p><strong>Status:</strong> {selectedUser.status}</p>
-            <p><strong>Phone:</strong> {selectedUser.phone}</p>
             <p><strong>Address:</strong> {selectedUser.address}</p>
             <p><strong>Country:</strong> {selectedUser.country}</p>
             <p><strong>DOB:</strong> {selectedUser.dob}</p>
