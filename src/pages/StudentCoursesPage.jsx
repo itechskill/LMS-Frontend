@@ -1,3 +1,341 @@
+// import React, { useEffect, useState } from "react";
+// import StudentSidebar from "../components/StudentSidebar";
+// import {
+//   getStudentEnrollments,
+//   getProgress,
+//   enrollStudentInCourse,
+//   getAllCourses,
+// } from "../api/api";
+// import { useNavigate } from "react-router-dom";
+// import { 
+//   FaClock, 
+//   FaChartLine, 
+//   FaArrowRight, 
+//   FaGraduationCap,
+//   FaCheckCircle,
+//   FaTimesCircle,
+//   FaBook,
+//   FaCalendarAlt
+// } from "react-icons/fa";
+
+// const StudentCoursesPage = () => {
+//   const [enrollments, setEnrollments] = useState([]);
+//   const [deletedEnrollments, setDeletedEnrollments] = useState([]);
+//   const [progressData, setProgressData] = useState({});
+//   const [loading, setLoading] = useState(true);
+//   const [availableCourses, setAvailableCourses] = useState([]);
+//   const [selectedCourse, setSelectedCourse] = useState("");
+//   const [enrolling, setEnrolling] = useState(false);
+//   const [error, setError] = useState("");
+
+//   const navigate = useNavigate();
+
+//   const userInfo = localStorage.getItem("userInfo");
+//   const studentId = userInfo ? JSON.parse(userInfo).id : null;
+
+//   useEffect(() => {
+//     if (studentId) {
+//       initializePage();
+//     }
+//   }, [studentId]);
+
+//   const initializePage = async () => {
+//     await Promise.all([fetchEnrollments(), fetchAllCourses()]);
+//   };
+
+//   const fetchEnrollments = async () => {
+//     try {
+//       setLoading(true);
+//       const data = await getStudentEnrollments(studentId);
+
+//       const active = data.filter((e) => !e.isDeleted);
+//       const deleted = data.filter((e) => e.isDeleted);
+
+//       setEnrollments(active);
+//       setDeletedEnrollments(deleted);
+
+//       const progressMap = {};
+//       for (const e of active) {
+//         try {
+//           const res = await getProgress(studentId, e.course._id);
+//           progressMap[e.course._id] = res.progressPercentage || 0;
+//         } catch {
+//           progressMap[e.course._id] = 0;
+//         }
+//       }
+//       setProgressData(progressMap);
+//     } catch (err) {
+//       console.error("Error fetching enrollments:", err);
+//       setError("Failed to load courses. Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const fetchAllCourses = async () => {
+//     try {
+//       const data = await getAllCourses();
+//       setAvailableCourses(data || []);
+//     } catch (err) {
+//       console.error("Error fetching courses:", err);
+//     }
+//   };
+
+//   const handleEnrollCourse = async () => {
+//     if (!selectedCourse) return;
+    
+//     setError("");
+//     setEnrolling(true);
+    
+//     try {
+//       await enrollStudentInCourse(studentId, selectedCourse);
+//       setSelectedCourse("");
+//       await fetchEnrollments();
+//     } catch (err) {
+//       setError(err.response?.data?.message || "Enrollment failed. Please try again.");
+//     } finally {
+//       setEnrolling(false);
+//     }
+//   };
+
+//   const getStatus = (endDate, progress) => {
+//     if (progress === 100)
+//       return { 
+//         text: "Completed", 
+//         color: "#10b981", 
+//         bg: "#d1fae5",
+//         icon: <FaCheckCircle />
+//       };
+//     if (endDate && new Date(endDate) < new Date())
+//       return { 
+//         text: "Expired", 
+//         color: "#ef4444", 
+//         bg: "#fee2e2",
+//         icon: <FaTimesCircle />
+//       };
+//     return { 
+//       text: "Active", 
+//       color: "#3b82f6", 
+//       bg: "#dbeafe",
+//       icon: <FaBook />
+//     };
+//   };
+
+//   const formatDate = (date) => {
+//     if (!date) return "N/A";
+//     return new Date(date).toLocaleDateString('en-US', { 
+//       month: 'short', 
+//       day: 'numeric', 
+//       year: 'numeric' 
+//     });
+//   };
+
+//   if (loading) {
+//     return (
+//       <div style={pageContainer}>
+//         <StudentSidebar />
+//         <div style={loadingContainer}>
+//           <div style={spinner}></div>
+//           <p style={loadingText}>Loading your courses...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div style={pageContainer}>
+//       <StudentSidebar />
+
+//       <div style={mainContent}>
+//         {/* HEADER SECTION */}
+//         <div style={headerSection}>
+//           <div style={headerLeft}>
+//             <h1 style={pageTitle}>
+//               <FaGraduationCap style={titleIcon} /> My Learning Journey
+//             </h1>
+//             <p style={pageSubtitle}>
+//               Track your progress and continue building your skills
+//             </p>
+//           </div>
+//           <div style={statsContainer}>
+//             <StatBadge 
+//               label="Total Courses" 
+//               value={enrollments.length}
+//               color="#667eea"
+//             />
+//             <StatBadge 
+//               label="Completed" 
+//               value={enrollments.filter(e => progressData[e.course._id] === 100).length}
+//               color="#10b981"
+//             />
+//           </div>
+//         </div>
+
+//         {/* ENROLL SECTION */}
+//         <div style={enrollSection}>
+//           <div style={enrollHeader}>
+//             <h3 style={enrollTitle}>Enroll in a New Course</h3>
+//             <p style={enrollSubtitle}>Select from available courses and start learning today</p>
+//           </div>
+          
+//           <div style={enrollForm}>
+//             <div style={selectWrapper}>
+//               <select
+//                 value={selectedCourse}
+//                 onChange={(e) => {
+//                   setSelectedCourse(e.target.value);
+//                   setError("");
+//                 }}
+//                 style={selectStyle}
+//               >
+//                 <option value="">Choose a course to enroll</option>
+//                 {availableCourses
+//                   .filter(c => !enrollments.some(e => e.course._id === c._id))
+//                   .map((c) => (
+//                     <option key={c._id} value={c._id}>
+//                       {c.title} {c.duration ? `(${c.duration} hours)` : ''}
+//                     </option>
+//                   ))}
+//               </select>
+//             </div>
+
+//             <button
+//               onClick={handleEnrollCourse}
+//               disabled={enrolling || !selectedCourse}
+//               style={{
+//                 ...enrollButton,
+//                 opacity: enrolling || !selectedCourse ? 0.6 : 1,
+//                 cursor: enrolling || !selectedCourse ? 'not-allowed' : 'pointer'
+//               }}
+//             >
+//               {enrolling ? (
+//                 <>
+//                   <div style={buttonSpinner}></div>
+//                   Enrolling...
+//                 </>
+//               ) : (
+//                 <>
+//                   <FaCheckCircle /> Enroll Now
+//                 </>
+//               )}
+//             </button>
+//           </div>
+          
+//           {error && (
+//             <div style={errorMessage}>
+//               <FaTimesCircle /> {error}
+//             </div>
+//           )}
+//         </div>
+
+//         {/* COURSES GRID */}
+//         <div style={coursesSection}>
+//           <h2 style={sectionTitle}>
+//             Active Courses <span style={courseCount}>({enrollments.length})</span>
+//           </h2>
+
+//           {enrollments.length === 0 ? (
+//             <div style={emptyState}>
+//               <FaGraduationCap style={emptyIcon} />
+//               <h3 style={emptyTitle}>No Courses Yet</h3>
+//               <p style={emptyText}>Enroll in a course above to start your learning journey!</p>
+//             </div>
+//           ) : (
+//             <div style={coursesGrid}>
+//               {enrollments.map((enrollment) => {
+//                 const course = enrollment.course;
+//                 const progress = progressData[course._id] || 0;
+//                 const status = getStatus(course.endDate, progress);
+
+//                 return (
+//                   <div key={enrollment._id} style={courseCard}>
+//                     {/* CARD HEADER */}
+//                     <div style={cardHeader}>
+//                       <div style={statusBadge(status)}>
+//                         <span style={statusIcon}>{status.icon}</span>
+//                         <span>{status.text}</span>
+//                       </div>
+//                       <div style={durationBadge}>
+//                         <FaClock style={badgeIcon} />
+//                         <span>{course.duration || "N/A"} hrs</span>
+//                       </div>
+//                     </div>
+
+//                     {/* COURSE INFO */}
+//                     <div style={cardBody}>
+//                       <h3 style={courseTitle}>{course.title}</h3>
+//                       <p style={courseDescription}>
+//                         {course.description?.substring(0, 120) || "No description available"}
+//                         {course.description?.length > 120 && "..."}
+//                       </p>
+
+//                       {/* DATE INFO */}
+//                       {course.endDate && (
+//                         <div style={dateInfo}>
+//                           <FaCalendarAlt style={dateIcon} />
+//                           <span>Ends: {formatDate(course.endDate)}</span>
+//                         </div>
+//                       )}
+//                     </div>
+
+//                     {/* PROGRESS SECTION */}
+//                     <div style={progressSection}>
+//                       <div style={progressHeader}>
+//                         <div style={progressLabel}>
+//                           <FaChartLine style={progressIcon} />
+//                           <span>Progress</span>
+//                         </div>
+//                         <span style={progressPercentage}>{progress}%</span>
+//                       </div>
+                      
+//                       <div style={progressBarContainer}>
+//                         <div style={progressBarTrack}>
+//                           <div
+//                             style={{
+//                               ...progressBarFill,
+//                               width: `${progress}%`,
+//                               background: progress === 100 
+//                                 ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)'
+//                                 : 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)'
+//                             }}
+//                           />
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     {/* ACTION BUTTON */}
+//                     <button
+//                       onClick={() => navigate(`/student/courses/${course._id}`)}
+//                       style={viewButton}
+//                       onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+//                       onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+//                     >
+//                       <span>View Course Content</span>
+//                       <FaArrowRight style={buttonArrow} />
+//                     </button>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// /* ================= REUSABLE COMPONENTS ================= */
+// const StatBadge = ({ label, value, color }) => (
+//   <div style={statBadgeContainer}>
+//     <div style={{ ...statBadgeValue, color }}>{value}</div>
+//     <div style={statBadgeLabel}>{label}</div>
+//   </div>
+// );
+
+
+
+
+
 import React, { useEffect, useState } from "react";
 import StudentSidebar from "../components/StudentSidebar";
 import {
@@ -29,38 +367,39 @@ const StudentCoursesPage = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-
   const userInfo = localStorage.getItem("userInfo");
   const studentId = userInfo ? JSON.parse(userInfo).id : null;
 
   useEffect(() => {
-    if (studentId) {
-      initializePage();
-    }
+    if (studentId) initializePage();
   }, [studentId]);
 
   const initializePage = async () => {
     await Promise.all([fetchEnrollments(), fetchAllCourses()]);
   };
 
+  // ===================== FETCH ENROLLMENTS =====================
   const fetchEnrollments = async () => {
     try {
       setLoading(true);
       const data = await getStudentEnrollments(studentId);
 
-      const active = data.filter((e) => !e.isDeleted);
-      const deleted = data.filter((e) => e.isDeleted);
+      const active = data.filter(e => !e.isDeleted);
+      const deleted = data.filter(e => e.isDeleted);
 
       setEnrollments(active);
       setDeletedEnrollments(deleted);
 
+      // Build progressData safely
       const progressMap = {};
       for (const e of active) {
+        const courseId = e.course?._id; // ✅ optional chaining
+        if (!courseId) continue;        // skip null course
         try {
-          const res = await getProgress(studentId, e.course._id);
-          progressMap[e.course._id] = res.progressPercentage || 0;
+          const res = await getProgress(studentId, courseId);
+          progressMap[courseId] = res.progressPercentage || 0;
         } catch {
-          progressMap[e.course._id] = 0;
+          progressMap[courseId] = 0;
         }
       }
       setProgressData(progressMap);
@@ -72,6 +411,7 @@ const StudentCoursesPage = () => {
     }
   };
 
+  // ===================== FETCH ALL COURSES =====================
   const fetchAllCourses = async () => {
     try {
       const data = await getAllCourses();
@@ -81,12 +421,11 @@ const StudentCoursesPage = () => {
     }
   };
 
+  // ===================== HANDLE ENROLL =====================
   const handleEnrollCourse = async () => {
     if (!selectedCourse) return;
-    
     setError("");
     setEnrolling(true);
-    
     try {
       await enrollStudentInCourse(studentId, selectedCourse);
       setSelectedCourse("");
@@ -98,74 +437,49 @@ const StudentCoursesPage = () => {
     }
   };
 
+  // ===================== GET STATUS =====================
   const getStatus = (endDate, progress) => {
     if (progress === 100)
-      return { 
-        text: "Completed", 
-        color: "#10b981", 
-        bg: "#d1fae5",
-        icon: <FaCheckCircle />
-      };
+      return { text: "Completed", color: "#10b981", bg: "#d1fae5", icon: <FaCheckCircle /> };
     if (endDate && new Date(endDate) < new Date())
-      return { 
-        text: "Expired", 
-        color: "#ef4444", 
-        bg: "#fee2e2",
-        icon: <FaTimesCircle />
-      };
-    return { 
-      text: "Active", 
-      color: "#3b82f6", 
-      bg: "#dbeafe",
-      icon: <FaBook />
-    };
+      return { text: "Expired", color: "#ef4444", bg: "#fee2e2", icon: <FaTimesCircle /> };
+    return { text: "Active", color: "#3b82f6", bg: "#dbeafe", icon: <FaBook /> };
   };
 
-  const formatDate = (date) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    });
-  };
+  const formatDate = (date) => !date ? "N/A" : new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-  if (loading) {
-    return (
-      <div style={pageContainer}>
-        <StudentSidebar />
-        <div style={loadingContainer}>
-          <div style={spinner}></div>
-          <p style={loadingText}>Loading your courses...</p>
-        </div>
+  // ===================== LOADING STATE =====================
+  if (loading) return (
+    <div style={pageContainer}>
+      <StudentSidebar />
+      <div style={loadingContainer}>
+        <div style={spinner}></div>
+        <p style={loadingText}>Loading your courses...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
+  // ===================== MAIN UI =====================
   return (
     <div style={pageContainer}>
       <StudentSidebar />
-
       <div style={mainContent}>
-        {/* HEADER SECTION */}
+
+        {/* HEADER */}
         <div style={headerSection}>
           <div style={headerLeft}>
-            <h1 style={pageTitle}>
-              <FaGraduationCap style={titleIcon} /> My Learning Journey
-            </h1>
-            <p style={pageSubtitle}>
-              Track your progress and continue building your skills
-            </p>
+            <h1 style={pageTitle}><FaGraduationCap style={titleIcon} /> My Learning Journey</h1>
+            <p style={pageSubtitle}>Track your progress and continue building your skills</p>
           </div>
           <div style={statsContainer}>
             <StatBadge 
               label="Total Courses" 
-              value={enrollments.length}
+              value={enrollments.filter(e => e.course).length} // ✅ only valid courses
               color="#667eea"
             />
             <StatBadge 
               label="Completed" 
-              value={enrollments.filter(e => progressData[e.course._id] === 100).length}
+              value={enrollments.filter(e => e.course && progressData[e.course._id] === 100).length} // ✅ null-safe
               color="#10b981"
             />
           </div>
@@ -177,25 +491,18 @@ const StudentCoursesPage = () => {
             <h3 style={enrollTitle}>Enroll in a New Course</h3>
             <p style={enrollSubtitle}>Select from available courses and start learning today</p>
           </div>
-          
+
           <div style={enrollForm}>
             <div style={selectWrapper}>
               <select
                 value={selectedCourse}
-                onChange={(e) => {
-                  setSelectedCourse(e.target.value);
-                  setError("");
-                }}
+                onChange={e => { setSelectedCourse(e.target.value); setError(""); }}
                 style={selectStyle}
               >
                 <option value="">Choose a course to enroll</option>
                 {availableCourses
-                  .filter(c => !enrollments.some(e => e.course._id === c._id))
-                  .map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.title} {c.duration ? `(${c.duration} hours)` : ''}
-                    </option>
-                  ))}
+                  .filter(c => !enrollments.some(e => e.course?._id === c._id)) // ✅ optional chaining
+                  .map(c => <option key={c._id} value={c._id}>{c.title} {c.duration ? `(${c.duration} hours)` : ''}</option>)}
               </select>
             </div>
 
@@ -208,33 +515,20 @@ const StudentCoursesPage = () => {
                 cursor: enrolling || !selectedCourse ? 'not-allowed' : 'pointer'
               }}
             >
-              {enrolling ? (
-                <>
-                  <div style={buttonSpinner}></div>
-                  Enrolling...
-                </>
-              ) : (
-                <>
-                  <FaCheckCircle /> Enroll Now
-                </>
-              )}
+              {enrolling ? <> <div style={buttonSpinner}></div> Enrolling...</> : <> <FaCheckCircle /> Enroll Now </>}
             </button>
           </div>
-          
-          {error && (
-            <div style={errorMessage}>
-              <FaTimesCircle /> {error}
-            </div>
-          )}
+
+          {error && <div style={errorMessage}><FaTimesCircle /> {error}</div>}
         </div>
 
         {/* COURSES GRID */}
         <div style={coursesSection}>
           <h2 style={sectionTitle}>
-            Active Courses <span style={courseCount}>({enrollments.length})</span>
+            Active Courses <span style={courseCount}>({enrollments.filter(e => e.course).length})</span>
           </h2>
 
-          {enrollments.length === 0 ? (
+          {enrollments.filter(e => e.course).length === 0 ? (
             <div style={emptyState}>
               <FaGraduationCap style={emptyIcon} />
               <h3 style={emptyTitle}>No Courses Yet</h3>
@@ -242,76 +536,41 @@ const StudentCoursesPage = () => {
             </div>
           ) : (
             <div style={coursesGrid}>
-              {enrollments.map((enrollment) => {
-                const course = enrollment.course;
+              {enrollments.map(e => {
+                const course = e.course;
+                if (!course) return null; // ✅ skip null courses
                 const progress = progressData[course._id] || 0;
                 const status = getStatus(course.endDate, progress);
 
                 return (
-                  <div key={enrollment._id} style={courseCard}>
-                    {/* CARD HEADER */}
+                  <div key={e._id} style={courseCard}>
                     <div style={cardHeader}>
-                      <div style={statusBadge(status)}>
-                        <span style={statusIcon}>{status.icon}</span>
-                        <span>{status.text}</span>
-                      </div>
-                      <div style={durationBadge}>
-                        <FaClock style={badgeIcon} />
-                        <span>{course.duration || "N/A"} hrs</span>
-                      </div>
+                      <div style={statusBadge(status)}>{status.icon} {status.text}</div>
+                      <div style={durationBadge}><FaClock style={badgeIcon} /> {course.duration || "N/A"} hrs</div>
                     </div>
 
-                    {/* COURSE INFO */}
                     <div style={cardBody}>
                       <h3 style={courseTitle}>{course.title}</h3>
                       <p style={courseDescription}>
-                        {course.description?.substring(0, 120) || "No description available"}
-                        {course.description?.length > 120 && "..."}
+                        {course.description?.substring(0,120) || "No description available"}{course.description?.length>120 && "..."}
                       </p>
-
-                      {/* DATE INFO */}
-                      {course.endDate && (
-                        <div style={dateInfo}>
-                          <FaCalendarAlt style={dateIcon} />
-                          <span>Ends: {formatDate(course.endDate)}</span>
-                        </div>
-                      )}
+                      {course.endDate && <div style={dateInfo}><FaCalendarAlt style={dateIcon} /> Ends: {formatDate(course.endDate)}</div>}
                     </div>
 
-                    {/* PROGRESS SECTION */}
                     <div style={progressSection}>
                       <div style={progressHeader}>
-                        <div style={progressLabel}>
-                          <FaChartLine style={progressIcon} />
-                          <span>Progress</span>
-                        </div>
+                        <div style={progressLabel}><FaChartLine style={progressIcon} /> Progress</div>
                         <span style={progressPercentage}>{progress}%</span>
                       </div>
-                      
                       <div style={progressBarContainer}>
                         <div style={progressBarTrack}>
-                          <div
-                            style={{
-                              ...progressBarFill,
-                              width: `${progress}%`,
-                              background: progress === 100 
-                                ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)'
-                                : 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)'
-                            }}
-                          />
+                          <div style={{ ...progressBarFill, width: `${progress}%`, background: progress===100 ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' : 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)' }} />
                         </div>
                       </div>
                     </div>
 
-                    {/* ACTION BUTTON */}
-                    <button
-                      onClick={() => navigate(`/student/courses/${course._id}`)}
-                      style={viewButton}
-                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-                    >
-                      <span>View Course Content</span>
-                      <FaArrowRight style={buttonArrow} />
+                    <button onClick={() => navigate(`/student/courses/${course._id}`)} style={viewButton}>
+                      View Course Content <FaArrowRight style={buttonArrow} />
                     </button>
                   </div>
                 );
@@ -319,12 +578,13 @@ const StudentCoursesPage = () => {
             </div>
           )}
         </div>
+
       </div>
     </div>
   );
 };
 
-/* ================= REUSABLE COMPONENTS ================= */
+/* ===================== REUSABLE COMPONENT ===================== */
 const StatBadge = ({ label, value, color }) => (
   <div style={statBadgeContainer}>
     <div style={{ ...statBadgeValue, color }}>{value}</div>

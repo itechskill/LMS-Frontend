@@ -1,3 +1,406 @@
+// import React, { useEffect, useState } from "react";
+// import StudentSidebar from "../components/StudentSidebar";
+// import { FaBook, FaClock, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+// import {
+//   getStudentEnrollments,
+//   getProgress,
+//   getAllCourses,
+//   enrollStudentInCourse,
+// } from "../api/api";
+
+// const StudentDashboard = () => {
+//   /* ================= USER INFO ================= */
+//   const userInfo = localStorage.getItem("userInfo");
+//   const parsedUser = userInfo ? JSON.parse(userInfo) : null;
+
+//   const studentId = parsedUser?._id || parsedUser?.id || null;
+//   const studentName = parsedUser?.fullName || parsedUser?.name || "Student";
+
+//   /* ================= STATES ================= */
+//   const [loading, setLoading] = useState(true);
+//   const [myCourses, setMyCourses] = useState(0);
+//   const [subscriptionTime, setSubscriptionTime] = useState("Loading...");
+//   const [coursesList, setCoursesList] = useState([]);
+//   const [enrolledCourses, setEnrolledCourses] = useState([]);
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [errors, setErrors] = useState({});
+
+//   const [enrollData, setEnrollData] = useState({
+//     name: parsedUser?.fullName || "",
+//     email: parsedUser?.email || "",
+//     phone: "",
+//     country: "",
+//     dob: "",
+//     gender: "",
+//     courses: "",
+//     message: "",
+//     agree: false,
+//   });
+
+//   /* ================= EFFECTS ================= */
+//   useEffect(() => {
+//     const initializeDashboard = async () => {
+//       setLoading(true);
+//       await Promise.all([fetchDashboard(), fetchCourses()]);
+//       setLoading(false);
+//     };
+//     initializeDashboard();
+//   }, []);
+
+//   /* ================= FUNCTIONS ================= */
+//   const fetchDashboard = async () => {
+//     if (!studentId) return;
+
+//     try {
+//       const enrollments = await getStudentEnrollments(studentId);
+//       console.log("enrollement",enrollments);
+//       setMyCourses(enrollments.length);
+//       // setEnrolledCourses(enrollments.map((e) => e.course._id));
+//       setEnrolledCourses(
+//         enrollments.filter((e) => e.course)
+//         .map((e) => e.course._id)
+//       );
+
+//       const activeCourse=enrollements.find((e) => e.course && e.course.endDate);
+//       // if (enrollments[0]?.course?.endDate) {
+//       if(activeCourse){
+//       // const diff = new Date(enrollments[0].course.endDate) - new Date();
+//        const diff = new Date(activeCourse.course.endDate) - new Date();
+//         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+//         setSubscriptionTime(days > 0 ? `${days} Days Remaining` : "Expired");
+//       } else {
+//         setSubscriptionTime("N/A");
+//       }
+//     } catch (error) {
+//       console.error("Error fetching dashboard:", error);
+//     }
+//   };
+
+//   const fetchCourses = async () => {
+//     try {
+//       const res = await getAllCourses();
+//       setCoursesList(res);
+//     } catch (error) {
+//       console.error("Error fetching courses:", error);
+//     }
+//   };
+
+//   const validateForm = () => {
+//     const newErrors = {};
+
+//     if (!enrollData.name.trim()) newErrors.name = "Full name is required";
+//     if (!enrollData.email.trim()) {
+//       newErrors.email = "Email is required";
+//     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(enrollData.email)) {
+//       newErrors.email = "Invalid email format";
+//     }
+//     if (!enrollData.phone.trim()) newErrors.phone = "Phone number is required";
+//     if (!enrollData.country.trim()) newErrors.country = "Country is required";
+//     if (!enrollData.dob) newErrors.dob = "Date of birth is required";
+//     if (!enrollData.gender) newErrors.gender = "Gender is required";
+//     if (!enrollData.courses) newErrors.courses = "Please select a course";
+//     if (!enrollData.agree) newErrors.agree = "You must agree to the rules";
+
+//     setErrors(newErrors);
+//     return Object.keys(newErrors).length === 0;
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value, type, checked } = e.target;
+//     setEnrollData({
+//       ...enrollData,
+//       [name]: type === "checkbox" ? checked : value,
+//     });
+//     // Clear error for this field when user starts typing
+//     if (errors[name]) {
+//       setErrors({ ...errors, [name]: "" });
+//     }
+//   };
+
+//   const handleEnroll = async (e) => {
+//     e.preventDefault();
+
+//     if (!validateForm()) return;
+
+//     if (enrolledCourses.includes(enrollData.courses)) {
+//       setErrors({ courses: "You are already enrolled in this course" });
+//       return;
+//     }
+
+//     setIsSubmitting(true);
+
+//     try {
+//       await enrollStudentInCourse(studentId, enrollData.courses);
+      
+//       // Show success message
+//       alert("✅ Enrolled successfully!");
+      
+//       // Reset form
+//       setEnrollData({
+//         name: parsedUser?.fullName || "",
+//         email: parsedUser?.email || "",
+//         phone: "",
+//         country: "",
+//         dob: "",
+//         gender: "",
+//         courses: "",
+//         message: "",
+//         agree: false,
+//       });
+      
+//       // Refresh dashboard
+//       await fetchDashboard();
+//     } catch (err) {
+//       setErrors({
+//         submit: err.response?.data?.message || "Enrollment failed. Please try again.",
+//       });
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+
+//   /* ================= UI ================= */
+//   if (loading) {
+//     return (
+//       <div style={{ display: "flex" }}>
+//         <StudentSidebar />
+//         <div style={loadingContainer}>
+//           <div style={spinner}></div>
+//           <p>Loading dashboard...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f8fafc" }}>
+//       <StudentSidebar />
+
+//       <div style={mainContainer}>
+//         {/* 🔹 HEADER SECTION */}
+//         <div style={headerSection}>
+//           <div>
+//             <h1 style={welcomeText}>
+//               Welcome back, <span style={{ color: "#0284c7" }}>{studentName}</span> 👋
+//             </h1>
+//             <p style={subtitleText}>Here's your learning overview and progress</p>
+//           </div>
+//         </div>
+
+//         {/* 🔹 STATISTICS CARDS */}
+//         <div style={cardGrid}>
+//           <StatCard
+//             icon={<FaBook />}
+//             title="My Courses"
+//             value={myCourses}
+//             subtitle={`${myCourses} ${myCourses === 1 ? 'course' : 'courses'} enrolled`}
+//             gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+//           />
+//           <StatCard
+//             icon={<FaClock />}
+//             title="Subscription Time"
+//             value={subscriptionTime}
+//             subtitle="Until your access expires"
+//             gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+//           />
+//         </div>
+
+//         {/* 🔹 ENROLLMENT FORM */}
+//         <div style={formSection}>
+//           <div style={formHeader}>
+//             <h2 style={formTitle}>Enroll in a New Course</h2>
+//             <p style={formSubtitle}>Fill out the form below to enroll in your desired course</p>
+//           </div>
+
+//           <div style={formStyle} onSubmit={handleEnroll}>
+//             <div className="form-grid">
+//               <FormInput
+//                 label="Full Name"
+//                 name="name"
+//                 value={enrollData.name}
+//                 onChange={handleChange}
+//                 error={errors.name}
+//                 required
+//               />
+//               <FormInput
+//                 label="Email Address"
+//                 name="email"
+//                 type="email"
+//                 value={enrollData.email}
+//                 onChange={handleChange}
+//                 error={errors.email}
+//                 required
+//               />
+//             </div>
+
+//             <div style={formGrid}>
+//               <FormInput
+//                 label="Phone Number"
+//                 name="phone"
+//                 type="tel"
+//                 value={enrollData.phone}
+//                 onChange={handleChange}
+//                 error={errors.phone}
+//                 required
+//               />
+//               <FormInput
+//                 label="Country"
+//                 name="country"
+//                 value={enrollData.country}
+//                 onChange={handleChange}
+//                 error={errors.country}
+//                 required
+//               />
+//             </div>
+
+//             <div style={formGrid}>
+//               <FormInput
+//                 label="Date of Birth"
+//                 name="dob"
+//                 type="date"
+//                 value={enrollData.dob}
+//                 onChange={handleChange}
+//                 error={errors.dob}
+//                 required
+//               />
+//               <FormSelect
+//                 label="Gender"
+//                 name="gender"
+//                 value={enrollData.gender}
+//                 onChange={handleChange}
+//                 error={errors.gender}
+//                 options={["Male", "Female", "Other"]}
+//                 required
+//               />
+//             </div>
+
+//             <FormSelect
+//               label="Select Course"
+//               name="courses"
+//               value={enrollData.courses}
+//               onChange={handleChange}
+//               error={errors.courses}
+//               options={coursesList.map((c) => ({ value: c._id, label: c.title }))}
+//               required
+//             />
+
+//             <div style={fieldContainer}>
+//               <label style={labelStyle}>Message (Optional)</label>
+//               <textarea
+//                 name="message"
+//                 value={enrollData.message}
+//                 onChange={handleChange}
+//                 style={textareaStyle}
+//                 placeholder="Add any additional information or questions..."
+//                 rows={4}
+//               />
+//             </div>
+
+//             <div style={rulesContainer}>
+//               <FaExclamationCircle style={{ color: "#f59e0b", fontSize: 18 }} />
+//               <p style={rulesText}>
+//                 Lectures downloads, screenshots, recordings, and sharing are strictly prohibited.
+//               </p>
+//             </div>
+
+//             <label style={checkboxLabel}>
+//               <input
+//                 type="checkbox"
+//                 name="agree"
+//                 checked={enrollData.agree}
+//                 onChange={handleChange}
+//                 style={checkboxStyle}
+//               />
+//               <span>I agree to the terms and rules stated above</span>
+//             </label>
+//             {errors.agree && <ErrorMessage message={errors.agree} />}
+//             {errors.submit && <ErrorMessage message={errors.submit} />}
+
+//             <button type="button" onClick={handleEnroll} style={submitButton} disabled={isSubmitting}>
+//               {isSubmitting ? (
+//                 <>
+//                   <div style={buttonSpinner}></div>
+//                   Processing...
+//                 </>
+//               ) : (
+//                 <>
+//                   <FaCheckCircle /> Submit & Proceed to Payment
+//                 </>
+//               )}
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// /* ================= REUSABLE COMPONENTS ================= */
+// const StatCard = ({ icon, title, value, subtitle, gradient }) => (
+//   <div style={{ ...statCard, background: gradient }}>
+//     <div style={statIconContainer}>{icon}</div>
+//     <div style={statContent}>
+//       <h3 style={statTitle}>{title}</h3>
+//       <p style={statValue}>{value}</p>
+//       <p style={statSubtitle}>{subtitle}</p>
+//     </div>
+//   </div>
+// );
+
+// const FormInput = ({ label, name, type = "text", value, onChange, error, required }) => (
+//   <div style={fieldContainer}>
+//     <label style={labelStyle}>
+//       {label} {required && <span style={{ color: "#ef4444" }}>*</span>}
+//     </label>
+//     <input
+//       name={name}
+//       type={type}
+//       value={value}
+//       onChange={onChange}
+//       style={{ ...inputStyle, ...(error ? errorInputStyle : {}) }}
+//     />
+//     {error && <ErrorMessage message={error} />}
+//   </div>
+// );
+
+// const FormSelect = ({ label, name, value, onChange, error, options, required }) => (
+//   <div style={fieldContainer}>
+//     <label style={labelStyle}>
+//       {label} {required && <span style={{ color: "#ef4444" }}>*</span>}
+//     </label>
+//     <select
+//       name={name}
+//       value={value}
+//       onChange={onChange}
+//       style={{ ...inputStyle, ...(error ? errorInputStyle : {}) }}
+//     >
+//       <option value="">Select {label}</option>
+//       {options.map((opt) =>
+//         typeof opt === "string" ? (
+//           <option key={opt} value={opt}>
+//             {opt}
+//           </option>
+//         ) : (
+//           <option key={opt.value} value={opt.value}>
+//             {opt.label}
+//           </option>
+//         )
+//       )}
+//     </select>
+//     {error && <ErrorMessage message={error} />}
+//   </div>
+// );
+
+// const ErrorMessage = ({ message }) => (
+//   <p style={errorText}>
+//     <FaExclamationCircle style={{ fontSize: 12 }} /> {message}
+//   </p>
+// );
+
+
+
+
+
 import React, { useEffect, useState } from "react";
 import StudentSidebar from "../components/StudentSidebar";
 import { FaBook, FaClock, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
@@ -53,11 +456,22 @@ const StudentDashboard = () => {
 
     try {
       const enrollments = await getStudentEnrollments(studentId);
-      setMyCourses(enrollments.length);
-      setEnrolledCourses(enrollments.map((e) => e.course._id));
+      console.log("enrollement", enrollments);
 
-      if (enrollments[0]?.course?.endDate) {
-        const diff = new Date(enrollments[0].course.endDate) - new Date();
+      // ✅ Count total courses
+      setMyCourses(enrollments.length);
+
+      // ✅ Save enrolled courses safely (filter out null courses)
+      setEnrolledCourses(
+        enrollments
+          .filter((e) => e.course) // only include non-null courses
+          .map((e) => e.course._id)
+      );
+
+      // ✅ Calculate subscription time using first active course
+      const activeCourse = enrollments.find((e) => e.course && e.course.endDate);
+      if (activeCourse) {
+        const diff = new Date(activeCourse.course.endDate) - new Date();
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         setSubscriptionTime(days > 0 ? `${days} Days Remaining` : "Expired");
       } else {
@@ -103,7 +517,6 @@ const StudentDashboard = () => {
       ...enrollData,
       [name]: type === "checkbox" ? checked : value,
     });
-    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
@@ -123,10 +536,9 @@ const StudentDashboard = () => {
 
     try {
       await enrollStudentInCourse(studentId, enrollData.courses);
-      
-      // Show success message
+
       alert("✅ Enrolled successfully!");
-      
+
       // Reset form
       setEnrollData({
         name: parsedUser?.fullName || "",
@@ -139,7 +551,7 @@ const StudentDashboard = () => {
         message: "",
         agree: false,
       });
-      
+
       // Refresh dashboard
       await fetchDashboard();
     } catch (err) {
@@ -185,7 +597,7 @@ const StudentDashboard = () => {
             icon={<FaBook />}
             title="My Courses"
             value={myCourses}
-            subtitle={`${myCourses} ${myCourses === 1 ? 'course' : 'courses'} enrolled`}
+            subtitle={`${myCourses} ${myCourses === 1 ? "course" : "courses"} enrolled`}
             gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
           />
           <StatCard
@@ -204,8 +616,9 @@ const StudentDashboard = () => {
             <p style={formSubtitle}>Fill out the form below to enroll in your desired course</p>
           </div>
 
-          <div style={formStyle} onSubmit={handleEnroll}>
-            <div style={formGrid}>
+          {/* ✅ Added onSubmit to form element */}
+          <form style={formStyle} onSubmit={handleEnroll}>
+            <div className="form-grid"> {/* ⚡ Use CSS class instead of inline media query */}
               <FormInput
                 label="Full Name"
                 name="name"
@@ -225,7 +638,7 @@ const StudentDashboard = () => {
               />
             </div>
 
-            <div style={formGrid}>
+            <div className="form-grid">
               <FormInput
                 label="Phone Number"
                 name="phone"
@@ -245,7 +658,7 @@ const StudentDashboard = () => {
               />
             </div>
 
-            <div style={formGrid}>
+            <div className="form-grid">
               <FormInput
                 label="Date of Birth"
                 name="dob"
@@ -308,7 +721,7 @@ const StudentDashboard = () => {
             {errors.agree && <ErrorMessage message={errors.agree} />}
             {errors.submit && <ErrorMessage message={errors.submit} />}
 
-            <button type="button" onClick={handleEnroll} style={submitButton} disabled={isSubmitting}>
+            <button type="submit" style={submitButton} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <div style={buttonSpinner}></div>
@@ -320,7 +733,7 @@ const StudentDashboard = () => {
                 </>
               )}
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
