@@ -145,7 +145,8 @@ const Lectures = () => {
   );
 
   const renderFile = (lec) => {
-    const base = "http://localhost:5000/";
+    const base = "/api";
+    // const base = "http://localhost:5000/";
     if (lec.videoPath) return <video width="120" controls src={base + lec.videoPath} />;
     if (lec.videoUrl) return <a href={lec.videoUrl} target="_blank" rel="noreferrer"><FaLink /> Watch</a>;
     if (lec.pdfPath) return <a href={base + lec.pdfPath} target="_blank" rel="noreferrer"><FaFilePdf /> PDF</a>;
