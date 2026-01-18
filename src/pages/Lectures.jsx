@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { FaEdit, FaTrash, FaPlus, FaEye, FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaVideo, FaLink } from "react-icons/fa";
 import { getLecturesByCourse, createLecture, updateLecture, deleteLecture } from "../api/api";
-
+const BASE_URL = process.env.REACT_APP_API_URL;
 const Lectures = () => {
   const { courseId } = useParams();
 
@@ -144,17 +144,64 @@ const Lectures = () => {
       lec.lectureNumber.toString().includes(searchTerm)
   );
 
-  const renderFile = (lec) => {
-    const base = "/api";
-    // const base = "http://localhost:5000/";
-    if (lec.videoPath) return <video width="120" controls src={base + lec.videoPath} />;
-    if (lec.videoUrl) return <a href={lec.videoUrl} target="_blank" rel="noreferrer"><FaLink /> Watch</a>;
-    if (lec.pdfPath) return <a href={base + lec.pdfPath} target="_blank" rel="noreferrer"><FaFilePdf /> PDF</a>;
-    if (lec.documentPath) return <a href={base + lec.documentPath} target="_blank" rel="noreferrer"><FaFileWord /> Doc</a>;
-    if (lec.excelPath) return <a href={base + lec.excelPath} target="_blank" rel="noreferrer"><FaFileExcel /> Excel</a>;
-    if (lec.pptPath) return <a href={base + lec.pptPath} target="_blank" rel="noreferrer"><FaFilePowerpoint /> PPT</a>;
-    return "—";
-  };
+  // const renderFile = (lec) => {
+  //   // const base = "/api";
+  //   const base = "http://localhost:5000/";
+  //   if (lec.videoPath) return <video width="120" controls src={base + lec.videoPath} />;
+  //   if (lec.videoUrl) return <a href={lec.videoUrl} target="_blank" rel="noreferrer"><FaLink /> Watch</a>;
+  //   if (lec.pdfPath) return <a href={base + lec.pdfPath} target="_blank" rel="noreferrer"><FaFilePdf /> PDF</a>;
+  //   if (lec.documentPath) return <a href={base + lec.documentPath} target="_blank" rel="noreferrer"><FaFileWord /> Doc</a>;
+  //   if (lec.excelPath) return <a href={base + lec.excelPath} target="_blank" rel="noreferrer"><FaFileExcel /> Excel</a>;
+  //   if (lec.pptPath) return <a href={base + lec.pptPath} target="_blank" rel="noreferrer"><FaFilePowerpoint /> PPT</a>;
+  //   return "—";
+  // };
+const renderFile = (lec) => {
+  if (lec.videoPath)
+    return (
+      <video
+        width="120"
+        controls
+        src={`${BASE_URL}/${lec.videoPath}`}
+      />
+    );
+
+  if (lec.videoUrl)
+    return (
+      <a href={lec.videoUrl} target="_blank" rel="noreferrer">
+        <FaLink /> Watch
+      </a>
+    );
+
+  if (lec.pdfPath)
+    return (
+      <a href={`${BASE_URL}/${lec.pdfPath}`} target="_blank" rel="noreferrer">
+        <FaFilePdf /> PDF
+      </a>
+    );
+
+  if (lec.documentPath)
+    return (
+      <a href={`${BASE_URL}/${lec.documentPath}`} target="_blank" rel="noreferrer">
+        <FaFileWord /> Doc
+      </a>
+    );
+
+  if (lec.excelPath)
+    return (
+      <a href={`${BASE_URL}/${lec.excelPath}`} target="_blank" rel="noreferrer">
+        <FaFileExcel /> Excel
+      </a>
+    );
+
+  if (lec.pptPath)
+    return (
+      <a href={`${BASE_URL}/${lec.pptPath}`} target="_blank" rel="noreferrer">
+        <FaFilePowerpoint /> PPT
+      </a>
+    );
+
+  return "—";
+};
 
   return (
     <div style={{ display: "flex" }}>
