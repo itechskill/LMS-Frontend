@@ -4,9 +4,10 @@ import { useAuth } from "../context/AuthContext";
 import io from "socket.io-client";
 import { getUsersForMessaging, sendMessage, getMessages, deleteMessage } from "../api/api";
 import { Send, Search, Paperclip, Smile, Trash2 } from "lucide-react";
+const BASE_URL = process.env.REACT_APP_API_URL;
 
-const socket = io("http://localhost:5000", { autoConnect: false });
-
+// const socket = io("http://localhost:5000", { autoConnect: false });
+const socket = io(BASE_URL, { autoConnect: false });
 const StudentMessages = () => {
   const { user } = useAuth();
   const [admins, setAdmins] = useState([]);

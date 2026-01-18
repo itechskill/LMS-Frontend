@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Sidebar from "../components/Sidebar";
 import { FaEdit, FaTrash, FaKey } from "react-icons/fa";
 import { getAllUsers, deleteUser, updateUser, createUser, getCourses } from "../api/api";
-
+const BASE_URL = process.env.REACT_APP_API_URL;
 // Reusable Modal Component
 const Modal = ({ children, onClose }) => (
   <div style={{
