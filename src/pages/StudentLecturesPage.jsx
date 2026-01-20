@@ -8,7 +8,7 @@ import {
 } from "../api/api";
 import { FaCheckCircle, FaFilePdf, FaClock, FaPlay, FaFileExcel, FaFileWord, FaFile } from "react-icons/fa";
 import { getUserId, isAuthenticated } from "../utils/auth";
-const BASE_URL = process.env.REACT_APP_API_URL;
+const BASE_URL = "http://itechskill.com";
 
 // Note: Make sure StudentSidebar is exported as default export
 // Example: export default StudentSidebar;
@@ -360,10 +360,7 @@ const StudentLecturesPage = () => {
                       background: "#000",
                     }}
                   >
-                    {/* <source
-                      src={`http://localhost:5000/${selectedLecture.videoPath}`}
-                    /> */}
-                  <source src={`http://${BASE_URL}/${selectedLecture.videoPath}`} />
+                  <source src={`${BASE_URL}/${selectedLecture.videoPath}`} />
                     Your browser does not support the video tag.
                   </video>
 
@@ -430,7 +427,6 @@ const StudentLecturesPage = () => {
                       <span>Lecture Notes (PDF)</span>
                     </div>
                     <a
-                      // href={`http://localhost:5000/${selectedLecture.pdfPath}`}
                       href={`${BASE_URL}/${selectedLecture.pdfPath}`}
                       target="_blank"
                       rel="noreferrer"
@@ -448,7 +444,6 @@ const StudentLecturesPage = () => {
                     </a>
                   </div>
                   <iframe
-                    // src={`http://localhost:5000/${selectedLecture.pdfPath}#toolbar=0`}
                     src={`${BASE_URL}/${selectedLecture.pdfPath}#toolbar=0`}
                     style={{
                       width: "100%",
@@ -483,7 +478,6 @@ const StudentLecturesPage = () => {
                       <span>{selectedLecture.excelPath ? 'Excel File' : 'CSV File'}</span>
                     </div>
                     <a
-                      // href={`http://localhost:5000/${selectedLecture.excelPath || selectedLecture.csvPath}`}
                       href={`${BASE_URL}/${selectedLecture.excelPath || selectedLecture.csvPath}`}
                       target="_blank"
                       rel="noreferrer"

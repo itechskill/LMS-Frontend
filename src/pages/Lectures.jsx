@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { FaEdit, FaTrash, FaPlus, FaEye, FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaVideo, FaLink } from "react-icons/fa";
 import { getLecturesByCourse, createLecture, updateLecture, deleteLecture } from "../api/api";
-const BASE_URL = process.env.REACT_APP_API_URL;
+const BASE_URL = "http://itechskill.com";
 const Lectures = () => {
   const { courseId } = useParams();
 
