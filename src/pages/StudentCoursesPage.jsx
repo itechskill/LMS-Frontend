@@ -439,7 +439,7 @@ const StudentCoursesPage = () => {
                 const courseId = course._id;
                 const progress = progressData[courseId] || 0;
                 const status = getStatus(progress);
-                const accessType = getCourseAccessType(courseId);
+                const accessType = getCourseAccessType(courseId,course);
                 const locked = isCourseLocked(enrollment, courseId);
                 const coursePrice = coursePrices[courseId] || course.price || 0;
 
