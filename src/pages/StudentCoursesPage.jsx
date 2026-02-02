@@ -212,7 +212,7 @@ const StudentCoursesPage = () => {
 };
 
 
-  const getCourseAccessType = (courseId) => {
+  const getCourseAccessType = (courseId, course) => {
     // const coursePrice = coursePrices[courseId] || 0;
     const coursePrice = coursePrices[courseId] ?? course.price ?? 0;
     const isPaid = paymentStatus[courseId] || false;
