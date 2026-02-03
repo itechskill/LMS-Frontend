@@ -1,0 +1,154 @@
+/* src/components/CompaniesLogo.css */
+
+/* ========== LOGOS & REVIEWS SECTION ========== */
+.logos-reviews-section {
+  padding: 20px 20px;
+  background: #e6ecf0;
+  max-width: 1400px;
+  margin: 30px auto 0;
+  border-radius: 30px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.trusted-section-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #22013a;
+  background: linear-gradient(135deg, #22013a 20%, #8e5203 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.trusted-section-subtitle {
+  font-size: 1.3rem;
+  color: #383737;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.logos-single-row-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0 30px;
+  width: 100%;
+}
+
+.logos-single-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto 20px;
+  padding: 10px 10px;
+  gap: 0;
+}
+
+/* Logo container styling */
+.logo-item-single {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  height: 120px;
+  padding: 0 5px;
+  background: transparent;
+}
+
+/* Logo images */
+.logo-item-single img {
+  width: auto;
+  height: 100%;
+  max-width: 90%;
+  max-height: 100px;
+  object-fit: contain;
+}
+
+.companies-label {
+  font-size: 1.2rem;
+  color: #666;
+  text-align: center;
+  margin-top: 15px;
+  font-weight: 500;
+  max-width: 800px;
+  line-height: 1.6;
+}
+
+/* Even BIGGER on large screens */
+@media (min-width: 1400px) {
+  .logo-item-single {
+    height: 140px;
+  }
+  
+  .logo-item-single img {
+    max-height: 120px;
+  }
+}
+
+/* Tablet - make logos smaller */
+@media (max-width: 992px) {
+  .logos-single-row {
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .logo-item-single {
+    flex: 0 0 calc(33.33% - 10px);
+    height: 100px;
+    margin: 5px 0;
+  }
+  
+  .logo-item-single img {
+    max-height: 80px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .logos-reviews-section {
+    padding: 20px 15px;
+  }
+  
+  .trusted-section-title {
+    font-size: 2rem;
+  }
+  
+  .logos-single-row-container {
+    margin: 30px 0 40px;
+  }
+  
+  .logo-item-single {
+    flex: 0 0 calc(50% - 10px);
+    height: 80px;
+  }
+  
+  .logo-item-single img {
+    max-height: 60px;
+  }
+  
+  .companies-label {
+    font-size: 1rem;
+  }
+}
+
+/* Tiny mobile */
+@media (max-width: 480px) {
+  .logo-item-single {
+    flex: 0 0 calc(50% - 5px);
+    height: 70px;
+  }
+  
+  .logo-item-single img {
+    max-height: 50px;
+  }
+}

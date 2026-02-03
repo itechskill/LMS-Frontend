@@ -36,7 +36,8 @@ const StudentSidebar = () => {
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       logout();
-      navigate("/login", { replace: true });
+      // navigate("/login", { replace: true });
+      navigate("/", { replace: true });
     }
   };
 

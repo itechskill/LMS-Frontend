@@ -148,6 +148,8 @@ const Login = () => {
 const styles = {
   container: {
     minHeight: "100vh",
+    // minHeight: "calc(100vh - 80px)",
+    paddingTop: "100px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

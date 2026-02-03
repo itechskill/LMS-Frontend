@@ -54,7 +54,7 @@ const COLORS = {
   typingBlue: "#3B82F6"
 };
 
-const BASE_URL = process.env.REACT_APP_API_URL || "https://localhost:5000";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const socket = io(BASE_URL, { autoConnect: false });
 
 const StudentMessages = () => {

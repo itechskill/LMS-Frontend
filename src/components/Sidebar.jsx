@@ -37,7 +37,7 @@ const AdminSidebar = () => {
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       localStorage.clear();
-      navigate("/login", { replace: true });
+      navigate("/", { replace: true });
     }
   };
 

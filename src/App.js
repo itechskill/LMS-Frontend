@@ -4,6 +4,8 @@ import { AuthProvider } from "./context/AuthContext";
 
 // Pages
 import StartScreen from "./pages/StartScreen";
+import YouTubeRecommendations from "./pages/YouTubeRecommendations";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -28,6 +30,9 @@ import StudentExamsPage from "./pages/StudentExamsPage";
 import StudentExamAttemptPage from "./pages/StudentExamAttemptPage";
 // Protected Route
 import ProtectedRoute from "./routes/ProtectedRoute";
+import PricingPlan from "./pages/PricingPlan";
+import Courses_Screen from "./pages/Courses_Screen";
+import WithNavbar from "./layouts/WithNavbar";
 
 function App() {
   return (
@@ -36,10 +41,21 @@ function App() {
         <Routes>
 
           {/* ================= PUBLIC ROUTES ================= */}
-          <Route path="/" element={<StartScreen />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          {/* <Route element={<WithNavbar />}>
+            <Route path="/" element={<YouTubeRecommendations/>}/>
+            < Route path="/pricing"element={<PricingPlan/>}/>
+            <Route path="/courses_screen" element={<Courses_Screen/>}/>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+         </Route> */}
 
+         <Route element={<WithNavbar />}>
+      <Route path="/" element={<YouTubeRecommendations />} />
+      <Route path="/pricing" element={<PricingPlan />} />
+      <Route path="/courses_screen" element={<Courses_Screen />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+    </Route>
           {/* ================= ADMIN ROUTES ================= */}
           <Route
             path="/admin/dashboard"
