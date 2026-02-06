@@ -492,10 +492,10 @@ const handleCarouselHover = (isHovering) => {
         <div className="ai-era-container">
           <div className="ai-era-content">
             <h2 className="ai-era-title">
-              Transform Your Career with iTechSkills AI Mastery
+              Transform Your Career with iTechSkill AI Mastery
             </h2>
             <p className="ai-era-subtitle">
-              Future-proof your expertise with iTechSkills Personal Pro Plan. Access exclusive content crafted by industry-leading AI experts.
+              Future-proof your expertise with iTechSkill Personal Pro Plan. Access exclusive content crafted by industry-leading AI experts.
             </p>
             
        <div className="ai-era-features">
@@ -531,7 +531,7 @@ const handleCarouselHover = (isHovering) => {
             <div className="image-placeholder">
               <img 
                 src={aiiImage} 
-                alt="iTechSkills AI Platform" 
+                alt="iTechSkill AI Platform" 
                 className="ai-platform-image"
                 onError={(e) => {
                   e.target.onerror = null;

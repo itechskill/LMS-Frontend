@@ -47,7 +47,7 @@ const CompaniesLogo = () => {
           <i>Trusted by Industry Leaders</i>
         </h2>
         <p className="trusted-section-subtitle">
-          Join thousands of professionals and companies who have transformed their careers with iTechSkills
+          Join thousands of professionals and companies who have transformed their careers with iTechSkill
         </p>
       </div>
 

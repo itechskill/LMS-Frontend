@@ -10,7 +10,8 @@ import {
   getEnrollmentStatus,
   getFilteredLectures,
   canAccessCourse,
-  getCourseById
+  getCourseById,
+  completePaymentProcess
 } from "../api/api";
 import {
   FaCheckCircle,
@@ -35,7 +36,8 @@ import {
   FaBars,
   FaTimes,
   FaTag,
-  FaGraduationCap
+  FaGraduationCap,
+  FaMoneyBillWave
 } from "react-icons/fa";
 import { getUserId, isAuthenticated } from "../utils/auth";
 
@@ -64,6 +66,8 @@ const StudentLecturesPage = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [courseData, setCourseData] = useState(null);
   const [lecturesBySubcategory, setLecturesBySubcategory] = useState({});
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [showPaymentMethodsModal, setShowPaymentMethodsModal] = useState(false);
 
   const studentId = getUserId();
 
@@ -78,23 +82,59 @@ const StudentLecturesPage = () => {
       try {
         setLoading(true);
         
-        // Get course details first
+        console.log("=== FETCHING COURSE DATA ===");
+        console.log("Course ID:", courseId);
+        console.log("Student ID:", studentId);
+        
+        // STEP 1: Get course details
+        console.log("📚 Fetching course details...");
         const courseRes = await getCourseById(courseId);
+        console.log("Course Data:", courseRes);
+        console.log("Course Price:", courseRes.price);
         setCourseData(courseRes);
         
-        // Check course access
+        // STEP 2: Check course access
+        console.log("=== CHECKING COURSE ACCESS ===");
         const access = await canAccessCourse(courseId, studentId);
+        console.log("Access Result:", access);
+        
         setCourseAccess({
-          ...access,
-          coursePrice: courseRes.price || 0
+          hasFullAccess: access.hasFullAccess || false,
+          isPaid: access.isPaid || false,
+          coursePrice: access.coursePrice || courseRes.price || 0,
+          hasAccess: access.canAccess || false
         });
         
-        // Get filtered lectures based on payment status
+        // STEP 3: Get filtered lectures based on payment status
+        console.log("=== FETCHING LECTURES ===");
         const filteredResult = await getFilteredLectures(courseId, studentId);
+        console.log("Filtered Lectures Result:", filteredResult);
+        console.log("Number of lectures:", filteredResult.lectures?.length || 0);
+        
+        // ✅ CRITICAL: Check if we got lectures
+        if (!filteredResult.lectures || filteredResult.lectures.length === 0) {
+          console.error("❌ NO LECTURES RECEIVED!");
+          console.log("Full response:", filteredResult);
+          
+          // Show alert only if it's not a filtering issue
+          if (!filteredResult.message || !filteredResult.message.includes("free preview")) {
+            alert("No lectures found for this course. Please contact support.");
+          } else {
+            console.log("ℹ️ No free preview lectures available - this is expected for unpaid students");
+          }
+        } else {
+          console.log("✅ Successfully loaded", filteredResult.lectures.length, "lectures");
+          
+          if (filteredResult.message) {
+            console.log("📝 Message:", filteredResult.message);
+          }
+        }
+        
         const lectureData = filteredResult.lectures || [];
         setLectures(lectureData);
         
-        // Group lectures by subcategory
+        // STEP 4: Group lectures by subcategory
+        console.log("📂 Grouping lectures by subcategory...");
         const groupedLectures = {};
         lectureData.forEach(lecture => {
           const subCategory = lecture.subCategory || "General Lectures";
@@ -103,39 +143,67 @@ const StudentLecturesPage = () => {
           }
           groupedLectures[subCategory].push(lecture);
         });
+        console.log("Grouped Lectures:", groupedLectures);
         setLecturesBySubcategory(groupedLectures);
         
-        // Get progress
+        // STEP 5: Get progress
+        console.log("=== FETCHING PROGRESS ===");
         const progressRes = await getProgress(studentId, courseId);
+        console.log("Progress Result:", progressRes);
         
-        const completed =
-          progressRes?.progress?.completedLectures?.map((l) => l._id) ||
-          progressRes?.completedLectures?.map((l) => l._id || l) ||
-          [];
+        const completed = progressRes?.completedLectures || 
+                         progressRes?.progress?.completedLectures || 
+                         [];
 
-        setCompletedLectures(completed);
+        const completedIds = Array.isArray(completed) 
+          ? completed.map(l => l._id || l)
+          : [];
+
+        setCompletedLectures(completedIds);
+        console.log("Completed Lecture IDs:", completedIds);
 
         // Progress %
         const progressData = {};
-        completed.forEach((id) => (progressData[id] = 100));
+        completedIds.forEach((id) => (progressData[id] = 100));
         setLectureProgress(progressData);
 
-        // Auto select first allowed lecture
+        // STEP 6: Auto select first lecture
         if (lectureData.length > 0) {
-          const firstAllowed = lectureData.find(
-            (l) => access.hasFullAccess || courseRes.price === 0 || l.isFreePreview
-          );
+          console.log("🎯 Auto-selecting first allowed lecture...");
+          let firstAllowed;
+          
+          // For free courses or students with full access, select first lecture
+          if (access.hasFullAccess || courseRes.price === 0) {
+            firstAllowed = lectureData[0];
+            console.log("✅ Free course or full access - selecting first lecture:", firstAllowed.title);
+          } 
+          // For paid courses, check if student has paid
+          else if (access.isPaid) {
+            firstAllowed = lectureData[0];
+            console.log("✅ Paid student - selecting first lecture:", firstAllowed.title);
+          }
+          // Otherwise find first free preview
+          else {
+            firstAllowed = lectureData.find(l => l.isFreePreview === true);
+            console.log("⚠️ Unpaid student - selecting first free preview:", firstAllowed?.title || "None available");
+          }
+          
           setSelectedLecture(firstAllowed || lectureData[0]);
+        } else {
+          console.log("⚠️ No lectures available to select");
         }
 
-        // Check if course completed
-        if (lectureData.length && completed.length === lectureData.length) {
+        // STEP 7: Check if course completed
+        if (lectureData.length && completedIds.length === lectureData.length) {
+          console.log("🎉 Course completed!");
           setCourseCompleted(true);
         }
         
-        // Get enrollment status
+        // STEP 8: Get enrollment status
+        console.log("=== FETCHING ENROLLMENT STATUS ===");
         try {
           const enrollmentRes = await getEnrollmentStatus(studentId, courseId);
+          console.log("Enrollment Status:", enrollmentRes);
           setCourseDetails({
             ...courseRes,
             enrollment: enrollmentRes
@@ -144,9 +212,16 @@ const StudentLecturesPage = () => {
           console.warn("Could not fetch enrollment details:", err);
         }
         
+        console.log("=== FETCH COMPLETE ===");
+        
       } catch (err) {
-        console.error("Load error", err);
-        alert("Failed to load course lectures");
+        console.error("❌ LOAD ERROR:", err);
+        console.error("Error details:", {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        alert(`Failed to load course lectures: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -157,25 +232,38 @@ const StudentLecturesPage = () => {
 
   /* ================= HELPERS ================= */
 
-  // const isLockedLecture = (lecture) => {
-  //   // Course is free - no lectures locked
-  //   if (courseData?.price === 0) return false;
+  const isLockedLecture = (lecture) => {
+    console.log("🔍 Checking if lecture is locked:", {
+      title: lecture.title,
+      coursePrice: courseAccess.coursePrice,
+      hasFullAccess: courseAccess.hasFullAccess,
+      isPaid: courseAccess.isPaid,
+      isFreePreview: lecture.isFreePreview
+    });
     
-  //   // Student has full access - no lectures locked
-  //   if (courseAccess.hasFullAccess) return false;
+    // FREE course - no lectures locked
+    if (courseAccess.coursePrice === 0) {
+      console.log("-> Course is FREE - NOT LOCKED");
+      return false;
+    }
     
-  //   // Free preview lectures are never locked
-  //   if (lecture.isFreePreview) return false;
+    // Student has full access or has paid
+    if (courseAccess.hasFullAccess || courseAccess.isPaid) {
+      console.log("-> Student has full access - NOT LOCKED");
+      return false;
+    }
     
-  //   // All other lectures in paid courses are locked if not paid
-  //   return true;
-  // };
-const isLockedLecture = (lecture) => {
-  if (courseData?.price === 0 || courseData?.course?.price === 0) return false;
-  if (courseAccess.hasFullAccess || courseAccess.isPaid) return false;
-  if (lecture.isFreePreview === true) return false;
-  return courseData?.price > 0 && !courseAccess.isPaid;
-};
+    // Free preview lectures are never locked
+    if (lecture.isFreePreview === true) {
+      console.log("-> Lecture is free preview - NOT LOCKED");
+      return false;
+    }
+    
+    // All other lectures in paid courses are locked if not paid
+    console.log("-> LOCKED (paid course, not paid, not free preview)");
+    return true;
+  };
+
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return "0:00";
     const m = Math.floor(seconds / 60);
@@ -222,6 +310,67 @@ const isLockedLecture = (lecture) => {
       }
     } catch (err) {
       console.error("Auto-complete error:", err);
+    }
+  };
+
+  /* ================= PAYMENT HANDLING ================= */
+  const handlePayment = async (paymentMethod) => {
+    try {
+      setProcessingPayment(true);
+      
+      console.log("💳 Processing payment:", { courseId, paymentMethod, amount: courseAccess.coursePrice });
+      
+      const result = await completePaymentProcess(courseId, paymentMethod, courseAccess.coursePrice);
+      
+      console.log("Payment result:", result);
+      
+      if (result.success) {
+        alert("Payment successful! Course is now unlocked.");
+        setShowPaymentMethodsModal(false);
+        setShowPaymentModal(false);
+        
+        console.log("🔄 Refreshing course access...");
+        
+        // Refresh course access
+        const access = await canAccessCourse(courseId, studentId);
+        setCourseAccess({
+          hasFullAccess: access.hasFullAccess || access.canAccess || false,
+          isPaid: access.isPaid || false,
+          coursePrice: access.coursePrice || courseData?.price || 0,
+          hasAccess: access.canAccess || false
+        });
+        
+        // Refresh lectures
+        const filteredResult = await getFilteredLectures(courseId, studentId);
+        const lectureData = filteredResult.lectures || [];
+        setLectures(lectureData);
+        
+        // Group lectures by subcategory
+        const groupedLectures = {};
+        lectureData.forEach(lecture => {
+          const subCategory = lecture.subCategory || "General Lectures";
+          if (!groupedLectures[subCategory]) {
+            groupedLectures[subCategory] = [];
+          }
+          groupedLectures[subCategory].push(lecture);
+        });
+        setLecturesBySubcategory(groupedLectures);
+        
+        // Select first lecture if none selected
+        if (!selectedLecture && lectureData.length > 0) {
+          setSelectedLecture(lectureData[0]);
+        }
+        
+        console.log("✅ Course access refreshed successfully");
+        
+      } else {
+        alert(result.message || "Payment failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert(err.response?.data?.message || "Payment processing error. Please try again.");
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
@@ -514,6 +663,29 @@ const isLockedLecture = (lecture) => {
       fontWeight: "600",
       color: "#4b5563",
     },
+
+    // Payment Methods Modal Styles
+    paymentMethodBtn: {
+      background: "#fff",
+      border: "2px solid #e2e8f0",
+      borderRadius: "12px",
+      padding: "20px 16px",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100px",
+      width: "100%",
+    },
+
+    methodGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(2, 1fr)",
+      gap: "12px",
+      marginTop: "16px",
+    },
   };
 
   if (loading) {
@@ -580,23 +752,51 @@ const isLockedLecture = (lecture) => {
               </h1>
               <div style={styles.courseMeta}>
                 <span style={styles.coursePriceBadge}>
-                  {courseData?.price === 0 ? (
+                  {courseAccess.coursePrice === 0 ? (
                     <>
                       <FaUnlock /> FREE COURSE
                     </>
                   ) : (
                     <>
-                      <FaRupeeSign /> ₹{courseData?.price || 0}
+                      <FaRupeeSign /> ₹{courseAccess.coursePrice || 0}
                     </>
                   )}
                 </span>
                 <span>{lectures.length} lectures</span>
                 <span>{completedLectures.length} completed</span>
               </div>
+              
+              {/* Course Access Status */}
+              <div style={{ 
+                marginTop: "12px", 
+                padding: "8px 12px",
+                borderRadius: "8px",
+                background: courseAccess.hasFullAccess ? "#d1fae5" : "#fee2e2",
+                color: courseAccess.hasFullAccess ? "#065f46" : "#991b1b",
+                fontSize: "14px",
+                fontWeight: "600",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px"
+              }}>
+                {courseAccess.hasFullAccess ? (
+                  <>
+                    <FaUnlock /> Full Access
+                  </>
+                ) : courseAccess.coursePrice === 0 ? (
+                  <>
+                    <FaUnlock /> Free Course
+                  </>
+                ) : (
+                  <>
+                    <FaLock /> Limited Access
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Payment Required Banner - Only show for paid courses that aren't purchased */}
-            {courseData?.price > 0 && !courseAccess.hasFullAccess && (
+            {courseAccess.coursePrice > 0 && !courseAccess.hasFullAccess && (
               <div style={styles.paymentBanner}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
@@ -630,7 +830,7 @@ const isLockedLecture = (lecture) => {
             )}
 
             {/* Free Course Notice */}
-            {courseData?.price === 0 && (
+            {courseAccess.coursePrice === 0 && (
               <div style={{
                 background: "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.1) 100%)",
                 border: "1px solid rgba(16, 185, 129, 0.3)",
@@ -643,188 +843,206 @@ const isLockedLecture = (lecture) => {
                   <strong style={{ color: "#059669" }}>Free Course</strong>
                 </div>
                 <p style={{ fontSize: "14px", color: "#065f46", margin: 0 }}>
-                  All lectures are available for free in this course.
+                  All {lectures.length} lectures are available for free in this course.
                 </p>
               </div>
             )}
 
             {/* Lectures by Subcategory */}
-            {Object.keys(lecturesBySubcategory).map((subcategory) => (
-              <div key={subcategory} style={styles.subcategorySection}>
-                <div style={styles.subcategoryHeader}>
-                  <h3 style={styles.subcategoryTitle}>
-                    <FaTag /> {subcategory}
-                    <span style={styles.lectureCount}>
-                      {lecturesBySubcategory[subcategory].length}
-                    </span>
-                  </h3>
-                </div>
+            {Object.keys(lecturesBySubcategory).length > 0 ? (
+              Object.keys(lecturesBySubcategory).map((subcategory) => (
+                <div key={subcategory} style={styles.subcategorySection}>
+                  <div style={styles.subcategoryHeader}>
+                    <h3 style={styles.subcategoryTitle}>
+                      <FaTag /> {subcategory}
+                      <span style={styles.lectureCount}>
+                        {lecturesBySubcategory[subcategory].length}
+                      </span>
+                    </h3>
+                  </div>
 
-                {/* Lecture List for this subcategory */}
-                {lecturesBySubcategory[subcategory].map((lecture) => {
-                  const locked = isLockedLecture(lecture);
-                  const completed = completedLectures.includes(lecture._id);
-                  const progress = getProgressPercentage(lecture._id);
-                  const isSelected = selectedLecture?._id === lecture._id;
-                  const isFreePreview = lecture.isFreePreview;
+                  {/* Lecture List for this subcategory */}
+                  {lecturesBySubcategory[subcategory].map((lecture) => {
+                    const locked = isLockedLecture(lecture);
+                    const completed = completedLectures.includes(lecture._id);
+                    const progress = getProgressPercentage(lecture._id);
+                    const isSelected = selectedLecture?._id === lecture._id;
+                    const isFreePreview = lecture.isFreePreview;
 
-                  return (
-                    <div
-                      key={lecture._id}
-                      onClick={() => {
-                        if (locked && courseData?.price > 0) {
-                          setShowPaymentModal(true);
-                          return;
-                        }
-                        setSelectedLecture(lecture);
-                      }}
-                      style={{
-                        ...styles.lectureCard,
-                        ...(locked ? styles.lockedCard : {}),
-                        ...(isSelected ? styles.selectedCard : {}),
-                      }}
-                    >
-                      {/* Progress Bar */}
-                      {!locked && (
-                        <div style={{
-                          ...styles.progressBar,
-                          width: `${progress}%`,
-                          background: completed 
-                            ? "linear-gradient(90deg, #10b981 0%, #34d399 100%)" 
-                            : "linear-gradient(90deg, #3D1A5B 0%, #5E427B 100%)"
-                        }} />
-                      )}
+                    return (
+                      <div
+                        key={lecture._id}
+                        onClick={() => {
+                          if (locked && courseAccess.coursePrice > 0) {
+                            setShowPaymentModal(true);
+                            return;
+                          }
+                          setSelectedLecture(lecture);
+                        }}
+                        style={{
+                          ...styles.lectureCard,
+                          ...(locked ? styles.lockedCard : {}),
+                          ...(isSelected ? styles.selectedCard : {}),
+                        }}
+                      >
+                        {/* Progress Bar */}
+                        {!locked && (
+                          <div style={{
+                            ...styles.progressBar,
+                            width: `${progress}%`,
+                            background: completed 
+                              ? "linear-gradient(90deg, #10b981 0%, #34d399 100%)" 
+                              : "linear-gradient(90deg, #3D1A5B 0%, #5E427B 100%)"
+                          }} />
+                        )}
 
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                        <div style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "8px",
-                          background: locked ? "#f3f4f6" : completed ? "#d1fae5" : "rgba(61, 26, 91, 0.1)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: locked ? "#9ca3af" : completed ? "#10b981" : "#3D1A5B",
-                          fontWeight: "700",
-                          fontSize: "16px",
-                          flexShrink: 0
-                        }}>
-                          {completed ? <FaCheckCircle /> : lecture.lectureNumber}
-                        </div>
-
-                        <div style={{ flex: 1 }}>
-                          <div style={{ 
-                            display: "flex", 
-                            justifyContent: "space-between", 
-                            alignItems: "flex-start",
-                            marginBottom: "4px"
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                          <div style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "8px",
+                            background: locked ? "#f3f4f6" : completed ? "#d1fae5" : "rgba(61, 26, 91, 0.1)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: locked ? "#9ca3af" : completed ? "#10b981" : "#3D1A5B",
+                            fontWeight: "700",
+                            fontSize: "16px",
+                            flexShrink: 0
                           }}>
-                            <div style={{ 
-                              fontSize: "15px", 
-                              fontWeight: "600", 
-                              color: locked ? "#9ca3af" : "#111827",
-                              lineHeight: "1.4"
-                            }}>
-                              {lecture.title}
-                              {isFreePreview && !locked && (
-                                <span style={{ 
-                                  fontSize: "11px", 
-                                  color: "#059669",
-                                  marginLeft: "8px",
-                                  background: "#d1fae5",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px"
-                                }}>
-                                  FREE PREVIEW
-                                </span>
-                              )}
-                            </div>
+                            {completed ? <FaCheckCircle /> : lecture.lectureNumber}
+                          </div>
+
+                          <div style={{ flex: 1 }}>
                             <div style={{ 
                               display: "flex", 
-                              alignItems: "center", 
-                              gap: "6px",
-                              fontSize: "12px",
-                              color: "#6b7280"
+                              justifyContent: "space-between", 
+                              alignItems: "flex-start",
+                              marginBottom: "4px"
                             }}>
-                              {lecture.duration && (
+                              <div style={{ 
+                                fontSize: "15px", 
+                                fontWeight: "600", 
+                                color: locked ? "#9ca3af" : "#111827",
+                                lineHeight: "1.4"
+                              }}>
+                                {lecture.title}
+                                {isFreePreview && !locked && (
+                                  <span style={{ 
+                                    fontSize: "11px", 
+                                    color: "#059669",
+                                    marginLeft: "8px",
+                                    background: "#d1fae5",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px"
+                                  }}>
+                                    FREE PREVIEW
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ 
+                                display: "flex", 
+                                alignItems: "center", 
+                                gap: "6px",
+                                fontSize: "12px",
+                                color: "#6b7280"
+                              }}>
+                                {lecture.duration && (
+                                  <>
+                                    <FaClock size={10} />
+                                    {lecture.duration}m
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            <div style={{ 
+                              fontSize: "13px", 
+                              color: locked ? "#9ca3af" : "#6b7280",
+                              marginBottom: "8px",
+                              textTransform: "uppercase"
+                            }}>
+                              {lecture.type}
+                            </div>
+
+                            {/* Access Status */}
+                            <div style={{
+                              ...styles.accessBadge,
+                              ...(locked ? styles.lockedBadge : isFreePreview ? styles.freeBadge : {
+                                background: "rgba(61, 26, 91, 0.1)",
+                                color: "#3D1A5B"
+                              })
+                            }}>
+                              {locked ? (
                                 <>
-                                  <FaClock size={10} />
-                                  {lecture.duration}m
+                                  <FaLock size={10} /> Locked
+                                </>
+                              ) : isFreePreview ? (
+                                <>
+                                  <FaUnlock size={10} /> Free Preview
+                                </>
+                              ) : (
+                                <>
+                                  <FaPlay size={10} /> Unlocked
                                 </>
                               )}
                             </div>
-                          </div>
 
-                          <div style={{ 
-                            fontSize: "13px", 
-                            color: locked ? "#9ca3af" : "#6b7280",
-                            marginBottom: "8px",
-                            textTransform: "uppercase"
-                          }}>
-                            {lecture.type}
-                          </div>
-
-                          {/* Access Status */}
-                          <div style={{
-                            ...styles.accessBadge,
-                            ...(locked ? styles.lockedBadge : isFreePreview ? styles.freeBadge : {
-                              background: "rgba(61, 26, 91, 0.1)",
-                              color: "#3D1A5B"
-                            })
-                          }}>
-                            {locked ? (
-                              <>
-                                <FaLock size={10} /> Locked
-                              </>
-                            ) : isFreePreview ? (
-                              <>
-                                <FaUnlock size={10} /> Free Preview
-                              </>
-                            ) : (
-                              <>
-                                <FaPlay size={10} /> Unlocked
-                              </>
+                            {/* Progress Display */}
+                            {!locked && progress > 0 && (
+                              <div style={{ marginTop: "8px" }}>
+                                <div style={{ 
+                                  display: "flex", 
+                                  justifyContent: "space-between", 
+                                  fontSize: "12px",
+                                  color: "#6b7280",
+                                  marginBottom: "4px"
+                                }}>
+                                  <span>Progress</span>
+                                  <span>{Math.round(progress)}%</span>
+                                </div>
+                                <div style={{
+                                  width: "100%",
+                                  height: "4px",
+                                  background: "#e5e7eb",
+                                  borderRadius: "2px",
+                                  overflow: "hidden"
+                                }}>
+                                  <div style={{
+                                    width: `${progress}%`,
+                                    height: "100%",
+                                    background: completed 
+                                      ? "linear-gradient(90deg, #10b981 0%, #34d399 100%)" 
+                                      : "linear-gradient(90deg, #3D1A5B 0%, #5E427B 100%)",
+                                    transition: "width 0.3s ease"
+                                  }} />
+                                </div>
+                              </div>
                             )}
                           </div>
-
-                          {/* Progress Display */}
-                          {!locked && progress > 0 && (
-                            <div style={{ marginTop: "8px" }}>
-                              <div style={{ 
-                                display: "flex", 
-                                justifyContent: "space-between", 
-                                fontSize: "12px",
-                                color: "#6b7280",
-                                marginBottom: "4px"
-                              }}>
-                                <span>Progress</span>
-                                <span>{Math.round(progress)}%</span>
-                              </div>
-                              <div style={{
-                                width: "100%",
-                                height: "4px",
-                                background: "#e5e7eb",
-                                borderRadius: "2px",
-                                overflow: "hidden"
-                              }}>
-                                <div style={{
-                                  width: `${progress}%`,
-                                  height: "100%",
-                                  background: completed 
-                                    ? "linear-gradient(90deg, #10b981 0%, #34d399 100%)" 
-                                    : "linear-gradient(90deg, #3D1A5B 0%, #5E427B 100%)",
-                                  transition: "width 0.3s ease"
-                                }} />
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              ))
+            ) : (
+              <div style={{ 
+                textAlign: "center", 
+                padding: "40px 20px", 
+                color: "#9ca3af" 
+              }}>
+                <FaBook style={{ fontSize: "48px", marginBottom: "16px", opacity: 0.5 }} />
+                <p style={{ fontSize: "16px", fontWeight: "500" }}>
+                  No lectures available
+                </p>
+                {courseAccess.coursePrice > 0 && !courseAccess.isPaid && (
+                  <p style={{ fontSize: "14px", marginTop: "12px", color: "#6b7280" }}>
+                    This course has no free preview lectures. Purchase the course to access all content.
+                  </p>
+                )}
               </div>
-            ))}
+            )}
           </div>
 
           {/* RIGHT PANEL - LECTURE CONTENT */}
@@ -855,7 +1073,7 @@ const isLockedLecture = (lecture) => {
                     : "This lecture is part of the paid course content. Purchase the course to unlock all lectures and continue your learning journey."
                   }
                 </p>
-                {courseData?.price > 0 && !selectedLecture.isFreePreview && (
+                {courseAccess.coursePrice > 0 && !selectedLecture.isFreePreview && (
                   <button
                     onClick={() => setShowPaymentModal(true)}
                     style={{
@@ -870,12 +1088,18 @@ const isLockedLecture = (lecture) => {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "12px",
-                      boxShadow: "0 4px 12px rgba(166, 138, 70, 0.3)"
+                      boxShadow: "0 4px 12px rgba(166, 138, 70, 0.3)",
+                      marginBottom: "12px"
                     }}
                   >
-                    <FaShoppingCart /> Unlock Course for ₹{courseData?.price || 0}
+                    <FaShoppingCart /> Unlock Course for ₹{courseAccess.coursePrice || 0}
                   </button>
                 )}
+                <div style={{ fontSize: "14px", color: "#6b7280" }}>
+                  {courseAccess.coursePrice > 0 
+                    ? `${lectures.filter(l => l.isFreePreview === true).length} free preview lectures available` 
+                    : "All lectures are available for free"}
+                </div>
               </div>
             ) : (
               <>
@@ -1171,7 +1395,7 @@ const isLockedLecture = (lecture) => {
       </div>
 
       {/* PAYMENT MODAL - Only for paid courses */}
-      {showPaymentModal && courseData?.price > 0 && (
+      {showPaymentModal && courseAccess.coursePrice > 0 && (
         <div style={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
           <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div style={{ textAlign: "center" }}>
@@ -1209,7 +1433,7 @@ const isLockedLecture = (lecture) => {
                 Course: {courseData?.title || "Course"}
               </div>
               <div style={{ fontSize: "40px", fontWeight: "800", color: "#3D1A5B", marginTop: "8px" }}>
-                ₹{courseData?.price || 0}
+                ₹{courseAccess.coursePrice || 0}
               </div>
               <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>
                 One-time payment • Lifetime access
@@ -1226,7 +1450,7 @@ const isLockedLecture = (lecture) => {
               <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                 <FaCheckCircle style={{ color: "#059669", marginTop: "2px", fontSize: "18px" }} />
                 <div style={{ fontSize: "14px", color: "#92400e", lineHeight: "1.6" }}>
-                  <strong>What's included:</strong> All {lectures.length} lectures, downloadable materials, progress tracking, and completion certificate
+                  <strong>What's included:</strong> All lectures, downloadable materials, progress tracking, and completion certificate
                 </div>
               </div>
             </div>
@@ -1234,7 +1458,7 @@ const isLockedLecture = (lecture) => {
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
               <button
                 onClick={() => {
-                  navigate(`/student/courses`);
+                  setShowPaymentMethodsModal(true);
                   setShowPaymentModal(false);
                 }}
                 style={{
@@ -1258,7 +1482,7 @@ const isLockedLecture = (lecture) => {
                 onMouseOver={e => e.target.style.transform = "translateY(-2px)"}
                 onMouseOut={e => e.target.style.transform = "translateY(0)"}
               >
-                <FaShoppingCart /> Go to Courses to Enroll
+                <FaShoppingCart /> Proceed to Payment
               </button>
             </div>
             
@@ -1277,7 +1501,7 @@ const isLockedLecture = (lecture) => {
                 marginTop: "12px"
               }}
             >
-              {courseData?.price === 0 ? "Continue Learning" : "Continue Browsing Free Lectures"}
+              Continue Browsing Free Lectures
             </button>
             
             <div style={{ 
@@ -1299,6 +1523,130 @@ const isLockedLecture = (lecture) => {
         </div>
       )}
 
+      {/* PAYMENT METHODS MODAL */}
+      {showPaymentMethodsModal && courseAccess.coursePrice > 0 && (
+        <div style={styles.modalOverlay} onClick={() => setShowPaymentMethodsModal(false)}>
+          <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div style={{ textAlign: "center", marginBottom: "24px" }}>
+              <h3 style={{ fontSize: "24px", fontWeight: "700", color: "#3D1A5B", marginBottom: "8px" }}>
+                Select Payment Method
+              </h3>
+              <p style={{ fontSize: "16px", color: "#6b7280" }}>
+                Total Amount: <strong style={{ color: "#3D1A5B" }}>₹{courseAccess.coursePrice || 0}</strong>
+              </p>
+            </div>
+
+            <div style={styles.methodGrid}>
+              <button
+                onClick={() => handlePayment('card')}
+                disabled={processingPayment}
+                style={{
+                  ...styles.paymentMethodBtn,
+                  opacity: processingPayment ? 0.7 : 1,
+                  cursor: processingPayment ? 'not-allowed' : 'pointer'
+                }}
+              >
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>💳</div>
+                <div style={{ fontWeight: "600", fontSize: "15px" }}>Credit/Debit Card</div>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>Pay with card</div>
+              </button>
+              
+              <button
+                onClick={() => handlePayment('upi')}
+                disabled={processingPayment}
+                style={{
+                  ...styles.paymentMethodBtn,
+                  opacity: processingPayment ? 0.7 : 1,
+                  cursor: processingPayment ? 'not-allowed' : 'pointer'
+                }}
+              >
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>📱</div>
+                <div style={{ fontWeight: "600", fontSize: "15px" }}>UPI</div>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>Pay with UPI ID</div>
+              </button>
+              
+              <button
+                onClick={() => handlePayment('netbanking')}
+                disabled={processingPayment}
+                style={{
+                  ...styles.paymentMethodBtn,
+                  opacity: processingPayment ? 0.7 : 1,
+                  cursor: processingPayment ? 'not-allowed' : 'pointer'
+                }}
+              >
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>🏦</div>
+                <div style={{ fontWeight: "600", fontSize: "15px" }}>Net Banking</div>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>All banks supported</div>
+              </button>
+              
+              <button
+                onClick={() => handlePayment('wallet')}
+                disabled={processingPayment}
+                style={{
+                  ...styles.paymentMethodBtn,
+                  opacity: processingPayment ? 0.7 : 1,
+                  cursor: processingPayment ? 'not-allowed' : 'pointer'
+                }}
+              >
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>👛</div>
+                <div style={{ fontWeight: "600", fontSize: "15px" }}>Wallet</div>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>Paytm, PhonePe, etc.</div>
+              </button>
+            </div>
+
+            {processingPayment && (
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "12px",
+                marginTop: "20px",
+                padding: "16px",
+                background: "rgba(61, 26, 91, 0.05)",
+                borderRadius: "8px"
+              }}>
+                <FaSpinner style={{ animation: "spin 1s linear infinite", fontSize: "20px", color: "#3D1A5B" }} />
+                <span style={{ fontSize: "14px", color: "#3D1A5B", fontWeight: "600" }}>
+                  Processing payment...
+                </span>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                setShowPaymentMethodsModal(false);
+                setShowPaymentModal(true);
+              }}
+              style={{
+                width: "100%",
+                background: "transparent",
+                color: "#64748b",
+                border: "none",
+                padding: "12px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "14px",
+                marginTop: "20px"
+              }}
+            >
+              ← Back
+            </button>
+            
+            <div style={{ 
+              fontSize: "12px", 
+              color: "#64748b", 
+              textAlign: "center", 
+              marginTop: "20px",
+              paddingTop: "20px",
+              borderTop: "1px solid #e5e7eb"
+            }}>
+              Your payment is secure and encrypted
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add CSS for animations and responsive */}
       <style>{`
         @keyframes spin {
@@ -1308,11 +1656,11 @@ const isLockedLecture = (lecture) => {
 
         /* Mobile Responsive Styles */
         @media (max-width: 1024px) {
-          [style*="mainContainer"] {
+          .mainContainer {
             flex-direction: column !important;
           }
 
-          [style*="leftPanel"], [style*="rightPanel"] {
+          .leftPanel, .rightPanel {
             width: 100% !important;
             min-width: auto !important;
             height: auto !important;
@@ -1330,50 +1678,60 @@ const isLockedLecture = (lecture) => {
         }
 
         @media (max-width: 768px) {
-          [style*="mobileMenuButton"] {
+          .mobileMenuButton {
             display: flex !important;
           }
 
-          [style*="desktopSidebar"] {
+          .desktopSidebar {
             display: none !important;
           }
 
-          [style*="contentContainer"] {
+          .contentContainer {
             margin-left: 0 !important;
           }
 
-          [style*="mainContainer"] {
+          .mainContainer {
             width: 100% !important;
             padding: 80px 16px 16px 16px !important;
           }
 
-          [style*="loadingContainer"] {
+          .loadingContainer {
             margin-left: 0 !important;
             padding: 80px 20px 20px 20px !important;
           }
 
-          [style*="leftPanel"], [style*="rightPanel"] {
+          .leftPanel, .rightPanel {
             padding: 16px !important;
           }
 
-          [style*="paymentBanner"] {
+          .paymentBanner {
             flex-direction: column !important;
             gap: 12px !important;
             align-items: flex-start !important;
           }
 
-          [style*="videoContainer"] video {
+          .videoContainer video {
             max-height: 300px !important;
+          }
+
+          .methodGrid {
+            grid-template-columns: 1fr !important;
           }
         }
 
         @media (max-width: 480px) {
-          [style*="mainContainer"] {
+          .mainContainer {
             padding: 70px 12px 12px 12px !important;
           }
 
-          [style*="modalContent"] {
+          .modalContent {
             padding: 20px !important;
+          }
+
+          .courseMeta {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
           }
         }
       `}</style>

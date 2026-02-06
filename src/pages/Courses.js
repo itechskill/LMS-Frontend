@@ -7,7 +7,6 @@ import {
   FaVideo, 
   FaPlus, 
   FaTimes, 
-  FaDollarSign, 
   FaLock, 
   FaUnlock,
   FaUsers,
@@ -20,7 +19,8 @@ import {
   FaSort,
   FaFilter,
   FaTags,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaSpinner
 } from "react-icons/fa";
 
 import { 
@@ -29,7 +29,8 @@ import {
   updateCourse, 
   createCourse,
   getAdminEnrollments,
-  getAdminPayments 
+  getAdminPayments,
+  grantFreeAccessToStudent
 } from "../api/api";
 
 // Exact Color Theme from UsersPage
@@ -102,7 +103,7 @@ const CATEGORIES = [
 ];
 
 // Modal Component matching UsersPage
-const Modal = ({ children, onClose }) => (
+const Modal = ({ children, onClose, width = "500px" }) => (
   <div style={{
     position: "fixed",
     inset: 0,
@@ -118,7 +119,7 @@ const Modal = ({ children, onClose }) => (
       padding: "24px",
       borderRadius: "12px",
       width: "100%",
-      maxWidth: "500px",
+      maxWidth: width,
       maxHeight: "90vh",
       overflowY: "auto",
       boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
@@ -247,7 +248,7 @@ const SubcategoryCheckbox = ({ subcategories, selectedSubcategories, onToggle, i
 
 // Subcategory badge component - shows subcategories as styled badges
 const SubcategoryBadge = ({ subcategories, isMobile }) => {
-  if (!subcategories || !Array.isArray(subcategories) || subcategories.length === 0) {
+  if (!subcategories || (!Array.isArray(subcategories) && typeof subcategories !== 'string')) {
     return <span style={{ color: COLORS.darkGray, fontSize: isMobile ? "11px" : "12px" }}>No subcategories</span>;
   }
 
@@ -256,9 +257,16 @@ const SubcategoryBadge = ({ subcategories, isMobile }) => {
   if (typeof subcategories === 'string') {
     try {
       subcats = JSON.parse(subcategories);
+      if (!Array.isArray(subcats)) {
+        subcats = subcategories.split(',');
+      }
     } catch (e) {
       subcats = subcategories.split(',');
     }
+  }
+
+  if (!Array.isArray(subcats) || subcats.length === 0) {
+    return <span style={{ color: COLORS.darkGray, fontSize: isMobile ? "11px" : "12px" }}>No subcategories</span>;
   }
 
   // Take only first 2 subcategories for display, show +more if there are more
@@ -362,6 +370,13 @@ const Courses = () => {
     paidCourses: 0,
     freeCourses: 0
   });
+
+  const [showFreeAccessModal, setShowFreeAccessModal] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [grantAccessLoading, setGrantAccessLoading] = useState(false);
+  const [grantAccessMessage, setGrantAccessMessage] = useState("");
+
   const navigate = useNavigate();
 
   // Form data state
@@ -400,13 +415,22 @@ const Courses = () => {
         ? coursesData 
         : Array.isArray(coursesData?.courses) 
           ? coursesData.courses 
-          : [];
+          : Array.isArray(coursesData?.data)
+            ? coursesData.data
+            : [];
       setCourses(coursesArray);
       
       // Fetch enrollments for admin
       try {
         const enrollmentsData = await getAdminEnrollments();
-        setEnrollments(enrollmentsData?.enrollments || []);
+        const enrollmentsArray = Array.isArray(enrollmentsData) 
+          ? enrollmentsData 
+          : Array.isArray(enrollmentsData?.enrollments) 
+            ? enrollmentsData.enrollments 
+            : Array.isArray(enrollmentsData?.data)
+              ? enrollmentsData.data
+              : [];
+        setEnrollments(enrollmentsArray);
       } catch (err) {
         console.warn("Could not fetch enrollments:", err);
         setEnrollments([]);
@@ -415,7 +439,14 @@ const Courses = () => {
       // Fetch payments for admin
       try {
         const paymentsData = await getAdminPayments();
-        setPayments(paymentsData?.payments || []);
+        const paymentsArray = Array.isArray(paymentsData) 
+          ? paymentsData 
+          : Array.isArray(paymentsData?.payments) 
+            ? paymentsData.payments 
+            : Array.isArray(paymentsData?.data)
+              ? paymentsData.data
+              : [];
+        setPayments(paymentsArray);
       } catch (err) {
         console.warn("Could not fetch payments:", err);
         setPayments([]);
@@ -493,6 +524,9 @@ const Courses = () => {
       if (typeof course.subCategories === 'string') {
         try {
           subCategoriesArray = JSON.parse(course.subCategories);
+          if (!Array.isArray(subCategoriesArray)) {
+            subCategoriesArray = course.subCategories.split(',');
+          }
         } catch (e) {
           subCategoriesArray = course.subCategories.split(',');
         }
@@ -640,6 +674,36 @@ const Courses = () => {
     return courseEnrollments.reduce((sum, e) => sum + (e.coursePrice || 0), 0);
   };
 
+  const handleGrantFreeAccess = async () => {
+    if (!selectedStudentId || !selectedCourseId) {
+      alert("Please enter student ID");
+      return;
+    }
+
+    try {
+      setGrantAccessLoading(true);
+      setGrantAccessMessage("");
+      
+      await grantFreeAccessToStudent(selectedStudentId, selectedCourseId);
+      
+      setGrantAccessMessage("✅ Free access granted successfully!");
+      
+      // Clear fields after success
+      setTimeout(() => {
+        setShowFreeAccessModal(false);
+        setSelectedStudentId("");
+        setSelectedCourseId(null);
+        fetchAllData(); // refresh enrollments
+      }, 1500);
+      
+    } catch (err) {
+      console.error("Grant free access error:", err);
+      setGrantAccessMessage(err.response?.data?.message || "Failed to grant free access");
+    } finally {
+      setGrantAccessLoading(false);
+    }
+  };
+
   // Filter courses
   const filteredCourses = Array.isArray(courses)
     ? courses.filter(
@@ -656,6 +720,32 @@ const Courses = () => {
           )
       )
     : [];
+
+  if (loading && !courses.length) {
+    return (
+      <div style={{ display: "flex", backgroundColor: COLORS.bgGray, minHeight: "100vh" }}>
+        <Sidebar />
+        <div style={{
+          flex: 1,
+          marginLeft: isMobile ? "0" : "280px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: "20px"
+        }}>
+          <FaSpinner style={{ fontSize: "40px", color: COLORS.deepPurple, animation: "spin 1s linear infinite" }} />
+          <p style={{ color: COLORS.darkGray, fontSize: "16px" }}>Loading courses...</p>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", backgroundColor: COLORS.bgGray, minHeight: "100vh" }}>
@@ -890,7 +980,7 @@ const Courses = () => {
                       color: COLORS.darkGray,
                       fontSize: isMobile ? "14px" : "15px"
                     }}>
-                      No courses found
+                      {searchTerm ? "No courses found matching your search" : "No courses available"}
                     </td>
                   </tr>
                 ) : (
@@ -938,7 +1028,7 @@ const Courses = () => {
                             fontWeight: "600",
                             display: "inline-block",
                           }}>
-                            {course.category}
+                            {course.category || "Uncategorized"}
                           </span>
                         </td>
                         <td style={{ padding: isMobile ? "14px 12px" : "18px 24px" }}>
@@ -954,7 +1044,7 @@ const Courses = () => {
                               color: course.price > 0 ? "#92400e" : "#065f46",
                               fontSize: isMobile ? "14px" : "15px"
                             }}>
-                              ₹{course.price}
+                              ₹{course.price || 0}
                             </span>
                             <span style={{
                               display: "inline-flex",
@@ -1011,7 +1101,7 @@ const Courses = () => {
                             borderRadius: "20px",
                             display: "inline-block"
                           }}>
-                            {course.status}
+                            {course.status || "Active"}
                           </span>
                         </td>
                         <td style={{ padding: isMobile ? "14px 12px" : "18px 24px" }}>
@@ -1065,6 +1155,27 @@ const Courses = () => {
                               <FaEdit size={isMobile ? 10 : 12} />
                             </button>
                             <button
+                              onClick={() => {
+                                setSelectedCourseId(course._id);
+                                setShowFreeAccessModal(true);
+                              }}
+                              style={{
+                                background: COLORS.teal,
+                                color: COLORS.white,
+                                border: "none",
+                                padding: "6px 12px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontSize: isMobile ? "10px" : "12px",
+                                fontWeight: "500"
+                              }}
+                            >
+                              Free Access
+                            </button>
+                            <button
                               onClick={() => handleDelete(course._id)}
                               style={{
                                 background: COLORS.danger,
@@ -1099,7 +1210,7 @@ const Courses = () => {
 
       {/* Add/Edit Form Modal */}
       {showForm && (
-        <Modal onClose={() => setShowForm(false)}>
+        <Modal onClose={() => setShowForm(false)} width="600px">
           <div style={{ width: "100%" }}>
             <div style={{ 
               display: "flex", 
@@ -1415,6 +1526,7 @@ const Courses = () => {
                   </div>
                 )}
               </div>
+              
 
               {/* Two-column grid for desktop */}
               <div style={{ 
@@ -1631,6 +1743,175 @@ const Courses = () => {
               </div>
             </form>
           </div>
+        </Modal>
+      )}
+      
+      {/* Free Access Modal */}
+      {showFreeAccessModal && (
+        <Modal onClose={() => setShowFreeAccessModal(false)}>
+          <div style={{ width: "100%" }}>
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              alignItems: "center", 
+              marginBottom: "20px" 
+            }}>
+              <h3 style={{ 
+                color: COLORS.deepPurple, 
+                margin: 0, 
+                fontSize: isMobile ? "18px" : "20px" 
+              }}>
+                Grant Free Access
+              </h3>
+              <button
+                onClick={() => {
+                  setShowFreeAccessModal(false);
+                  setSelectedStudentId("");
+                  setGrantAccessMessage("");
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                  color: COLORS.deepPurple,
+                  transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = "#5B21B6"}
+                onMouseLeave={(e) => e.currentTarget.style.color = COLORS.deepPurple}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div>
+                <label style={{ 
+                  display: "block", 
+                  marginBottom: "6px", 
+                  color: COLORS.textGray, 
+                  fontWeight: "600", 
+                  fontSize: "14px" 
+                }}>
+                  Student ID *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter Student ID"
+                  value={selectedStudentId}
+                  onChange={(e) => setSelectedStudentId(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: `1px solid ${COLORS.darkGray}`,
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                />
+                <div style={{ 
+                  marginTop: "4px", 
+                  fontSize: "12px", 
+                  color: COLORS.darkGray 
+                }}>
+                  Enter the student's ID to grant free access
+                </div>
+              </div>
+              
+              {grantAccessMessage && (
+                <div style={{
+                  padding: "12px",
+                  borderRadius: "8px",
+                  background: grantAccessMessage.includes("✅") ? COLORS.greenLight : "#fee2e2",
+                  color: grantAccessMessage.includes("✅") ? "#065f46" : "#991b1b",
+                  fontSize: "14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px"
+                }}>
+                  {grantAccessMessage}
+                </div>
+              )}
+              
+              <div style={{ 
+                display: "flex", 
+                gap: "12px", 
+                marginTop: "20px"
+              }}>
+                <button
+                  onClick={handleGrantFreeAccess}
+                  disabled={grantAccessLoading || !selectedStudentId}
+                  style={{
+                    background: COLORS.formButton,
+                    color: COLORS.white,
+                    border: "none",
+                    padding: "12px 24px",
+                    borderRadius: "8px",
+                    flex: 1,
+                    cursor: (grantAccessLoading || !selectedStudentId) ? "not-allowed" : "pointer",
+                    opacity: (grantAccessLoading || !selectedStudentId) ? 0.7 : 1,
+                    fontSize: "15px",
+                    fontWeight: "600",
+                    transition: "all 0.3s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px"
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!grantAccessLoading && selectedStudentId) {
+                      e.currentTarget.style.background = "#2563EB";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!grantAccessLoading && selectedStudentId) {
+                      e.currentTarget.style.background = COLORS.formButton;
+                    }
+                  }}
+                >
+                  {grantAccessLoading ? (
+                    <>
+                      <FaSpinner style={{ animation: "spin 1s linear infinite" }} />
+                      Processing...
+                    </>
+                  ) : (
+                    "Grant Access"
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFreeAccessModal(false);
+                    setSelectedStudentId("");
+                    setGrantAccessMessage("");
+                  }}
+                  style={{
+                    background: COLORS.cancelButton,
+                    color: COLORS.white,
+                    border: "none",
+                    padding: "12px 24px",
+                    borderRadius: "8px",
+                    flex: 1,
+                    cursor: "pointer",
+                    fontSize: "15px",
+                    fontWeight: "600",
+                    transition: "all 0.3s ease"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#4B5563"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = COLORS.cancelButton}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
         </Modal>
       )}
     </div>

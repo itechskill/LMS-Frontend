@@ -110,7 +110,7 @@ const Footer = () => {
 
       {/* EXISTING FOOTER CONTENT */}
       <div className="footer-copyright">
-        <p>© 2025 iTechSkills. All rights reserved.</p>
+        <p>© 2025 iTechSkill. All rights reserved.</p>
         <p className="footer-tagline">Empowering the next generation of tech professionals</p>
       </div>
       

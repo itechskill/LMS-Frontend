@@ -7,15 +7,15 @@ const Review = () => {
   const reviewsData = [
     {
       id: 1,
-      quote: "iTechSkills was rated as one of the most comprehensive and practical online learning platforms for mastering AI, Data Science, and emerging technologies according to our 2025 graduate survey.",
+      quote: "iTechSkill was rated as one of the most comprehensive and practical online learning platforms for mastering AI, Data Science, and emerging technologies according to our 2025 graduate survey.",
       initials: "IA",
-      name: "iTechSkills Alumni",
+      name: "iTechSkill Alumni",
       role: "45,320 responses collected",
       company: null
     },
     {
       id: 2,
-      quote: "iTechSkills completely transformed my career trajectory. After completing the AI Mastery program, I landed a machine learning role with a 60% salary increase. The real-world projects made all the difference!",
+      quote: "iTechSkill completely transformed my career trajectory. After completing the AI Mastery program, I landed a machine learning role with a 60% salary increase. The real-world projects made all the difference!",
       initials: "SZ",
       name: "Sarah Zulfiqar",
       role: "Senior ML Engineer at",
@@ -23,7 +23,7 @@ const Review = () => {
     },
     {
       id: 3,
-      quote: "The hands-on approach and industry-relevant curriculum at iTechSkills prepared me perfectly for my current role. The instructors are actual practitioners, not just teachers. Best ROI on education I've ever experienced.",
+      quote: "The hands-on approach and industry-relevant curriculum at iTechSkill prepared me perfectly for my current role. The instructors are actual practitioners, not just teachers. Best ROI on education I've ever experienced.",
       initials: "JA",
       name: "Jamshaid Ali",
       role: "Cloud Solutions Architect at",
@@ -31,7 +31,7 @@ const Review = () => {
     },
     {
       id: 4,
-      quote: "With iTechSkills, our team was able to bridge the gap between cutting-edge technology and essential soft skills. The platform has been instrumental in accelerating our digital transformation journey.",
+      quote: "With iTechSkill, our team was able to bridge the gap between cutting-edge technology and essential soft skills. The platform has been instrumental in accelerating our digital transformation journey.",
       initials: "BW",
       name: "Bakhtawar Waraich",
       role: "Head of Learning & Development,",
