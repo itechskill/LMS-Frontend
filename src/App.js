@@ -34,6 +34,17 @@ import PricingPlan from "./pages/PricingPlan";
 import Courses_Screen from "./pages/Courses_Screen";
 import WithNavbar from "./layouts/WithNavbar";
 
+import AboutUs from "./pages/AboutUs";
+import Careers from "./pages/Careers";
+import Contact from "./pages/Contact";
+import Categories from "./pages/Categories";
+import All_Courses from "./pages/All_Courses";
+import Certification from "./pages/Certification";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import HelpCenter from "./pages/HelpCenter";
+import Faq from "./pages/Faq";
+
 function App() {
   return (
     <AuthProvider>
@@ -55,6 +66,16 @@ function App() {
       <Route path="/courses_screen" element={<Courses_Screen />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/AboutUs" element={<AboutUs />} />
+          <Route path="/Careers" element={<Careers />} />
+          <Route path="/Contact" element={<Contact />} />
+          <Route path="/Categories" element={<Categories />} />
+          <Route path="/All_Courses" element={<All_Courses />} />
+          <Route path="/Certification" element={<Certification />} />
+          <Route path="/Privacy" element={<Privacy />} />
+          <Route path="/Terms" element={<Terms/>} />
+          <Route path="/HelpCenter" element={<HelpCenter/>} />
+           <Route path="/Faq" element={<Faq/>} />
     </Route>
           {/* ================= ADMIN ROUTES ================= */}
           <Route

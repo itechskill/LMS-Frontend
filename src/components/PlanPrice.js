@@ -4,7 +4,11 @@ import { FaCheck } from 'react-icons/fa';
 import './PlanPrice.css';
 
 const PlanPrice = () => {
-  // Deployment Plans Data
+
+  const handleContactClick = () => {
+    // Navigate to contact page
+    window.location.href = '/Contact'; // or your actual contact page route
+  };
   const deploymentPlans = [
     {
       id: 1,
@@ -63,11 +67,10 @@ const PlanPrice = () => {
         }
       ],
       buttonText: "Contact Us",
-      buttonAction: () => console.log("Contact for AI Fluency"),
+      buttonAction: handleContactClick, // Changed to use the navigation function
       color: "#5624d0"
     }
   ];
-
   return (
     <div className="deployment-strategies-section">
       <div className="deployment-container">

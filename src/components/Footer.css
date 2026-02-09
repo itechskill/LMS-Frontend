@@ -2,9 +2,9 @@
 .footer {
   background: #22013a;
   border-top: 1px solid #eaeaea;
-  padding:  0; /* REMOVED horizontal padding */
+  padding:  0;
   margin-top: 60px;
-  width: 100vw; /* Changed from 100% to 100vw */
+  width: 100vw;
   position: relative;
   left: 50%;
   right: 50%;
@@ -12,30 +12,29 @@
   margin-right: -50vw;
   box-sizing: border-box;
 }
+
 /* NEW STYLES - Skills Section */
 .footer-skills-section {
-  
-background: #36045a;
+  background: #36045a;
   max-width: 100vw;
-padding: 40px 20px 60px;
+  padding: 40px 20px 60px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
 }
 
 .skills-maain-title {
-  color: #f9f493; /* Yellow color */
+  color: #f9f493;
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 30px 50px;
   text-align: left;
-   max-width: 1400px; 
+  max-width: 1400px;
 }
 
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 80px 60px;
-   margin-left: 50px;
+  margin-left: 50px;
 }
 
 .skills-category {
@@ -43,7 +42,12 @@ padding: 40px 20px 60px;
   flex-direction: column;
 }
 
-.category-title {
+/* Desktop View - Always visible */
+.desktop-view {
+  display: block;
+}
+
+.category-title.desktop-view {
   color: #ffffff;
   font-size: 1.3rem;
   font-weight: 600;
@@ -51,30 +55,71 @@ padding: 40px 20px 60px;
   text-align: left;
 }
 
-.category-links {
+.category-links.desktop-view {
   list-style: none;
   padding: 0;
   margin: 0;
   text-align: left;
   color: #eaeaea;
+  display: block;
 }
 
-.category-links li {
+.category-links.desktop-view li {
   margin-bottom: 8px;
 }
 
-.category-links a {
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
-  display: inline-block;
-  text-align: left;
+/* Mobile View - Hidden by default on desktop */
+.mobile-view {
+  display: none;
 }
 
-.category-links a:hover {
+/* Mobile Category Header */
+.mobile-category-header {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.category-title.mobile-view {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dropdown-arrow {
   color: #f9f493;
-  text-decoration: underline;
+  font-size: 1.2rem;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Links - Collapsed by default */
+.category-links.mobile-view {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  color: #eaeaea;
+}
+
+.category-links.mobile-view.open {
+  max-height: 500px;
+  transition: max-height 0.5s ease-in;
+}
+
+.category-links.mobile-view li {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* EXISTING STYLES */
@@ -82,7 +127,6 @@ padding: 40px 20px 60px;
   text-align: center;
   margin-bottom: 40px;
   padding-top: 40px;
-  
 }
 
 .footer-copyright p {
@@ -101,7 +145,7 @@ padding: 40px 20px 60px;
   gap: 40px;
   max-width: 1200px;
   margin: 0 auto;
-   padding-bottom: 60px;
+  padding-bottom: 60px;
 }
 
 .company-title,
@@ -139,13 +183,10 @@ padding: 40px 20px 60px;
   text-decoration: underline;
 }
 
-
-
-
-
+/* MEDIA QUERIES */
 @media (max-width: 768px) {
   .footer {
-    padding: 30px 0; /* REMOVED horizontal padding */
+    padding: 30px 0;
     width: 100vw;
     position: relative;
     left: 50%;
@@ -154,34 +195,73 @@ padding: 40px 20px 60px;
     margin-right: -50vw;
   }
   
+  .skills-maain-title {
+    margin: 0 20px 30px;
+    font-size: 1.3rem;
+  }
+  
   .skills-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px 20px;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-left: 0;
+    padding: 0 20px;
+  }
+  
+  /* Hide desktop view on mobile */
+  .desktop-view {
+    display: none !important;
+  }
+  
+  /* Show mobile view */
+  .mobile-view {
+    display: block !important;
+  }
+  
+  .mobile-category-header {
+    display: flex;
+  }
+  
+  .skills-category {
+    margin-bottom: 5px;
   }
   
   .footer-links {
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
-    padding: 0 15px; /* Add padding to inner container */
+    padding: 0 15px;
   }
   
   .footer-copyright {
-    padding: 0 15px; /* Add padding to inner container */
+    padding: 0 15px;
+  }
+  
+  .company-title,
+  .learning-title,
+  .support-title {
+    padding-left: 0;
   }
 }
+
 @media (max-width: 480px) {
   .skills-grid {
-    grid-template-columns: 1fr;
-    gap: 25px;
+    padding: 0 15px;
   }
   
   .footer-links {
     grid-template-columns: 1fr;
     gap: 25px;
-    padding: 0 15px; /* Add padding to inner container */
+    padding: 0 15px;
   }
   
   .footer-copyright {
-    padding: 0 15px; /* Add padding to inner container */
+    padding: 0 15px;
+  }
+  
+  .category-title.mobile-view {
+    font-size: 1rem;
+  }
+  
+  .category-links.mobile-view li {
+    font-size: 0.9rem;
   }
 }

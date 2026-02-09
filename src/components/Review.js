@@ -1,4 +1,3 @@
-// src/components/Review.js
 import React from 'react';
 import './Review.css';
 
@@ -41,30 +40,32 @@ const Review = () => {
 
   return (
     <div className="reviews-container">
-      <h3 className="reviews-title">Join others transforming their lives through learning</h3>
-      
-      <div className="reviews-grid">
-        {reviewsData.map((review) => (
-          <div key={review.id} className="review-card">
-            <div className="review-quote">&ldquo;</div>
-            <p className="review-content">{review.quote}</p>
-            <div className="review-footer">
-              <div className="reviewer-avatar">
-                <span className="avatar-initials">{review.initials}</span>
-              </div>
-              <div className="reviewer-details">
-                <p className="reviewer-name">{review.name}</p>
-                <p className="reviewer-role">{review.role}</p>
-                {review.company && <p className="reviewer-company">{review.company}</p>}
+      <div className="reviews-inner">
+        <h3 className="reviews-title">Join others transforming their lives through learning</h3>
+        
+        <div className="reviews-grid">
+          {reviewsData.map((review) => (
+            <div key={review.id} className="review-card">
+              <div className="review-quote">&ldquo;</div>
+              <p className="review-content">{review.quote}</p>
+              <div className="review-footer">
+                <div className="reviewer-avatar">
+                  <span className="avatar-initials">{review.initials}</span>
+                </div>
+                <div className="reviewer-details">
+                  <p className="reviewer-name">{review.name}</p>
+                  <p className="reviewer-role">
+                    {review.role}
+                    {review.company && (
+                      <span className="reviewer-company"> {review.company}</span>
+                    )}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-      
-      <a href="/success-stories" className="view-all-reviews">
-        View all stories →
-      </a>
     </div>
   );
 };

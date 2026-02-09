@@ -1,6 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
+
 const Footer = () => {
+  // State for mobile dropdowns
+  const [openCategories, setOpenCategories] = useState({});
+
+  // Toggle dropdown for mobile
+  const toggleCategory = (category) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  // Skills categories data
+  const skillsCategories = [
+    {
+      id: 'in-demand-careers',
+      title: 'In-demand Careers',
+      items: ['Data Scientist', 'Full Stack Web Developer', 'Cloud Engineer', 'Project Manager', 'Game Developer', 'All Career Accelerators']
+    },
+    {
+      id: 'web-development',
+      title: 'Web Development',
+      items: ['WordPress Development', 'WordPress Theme Development', 'WordPress Plugin Development', 'WooCommerce Development', 'PHP for WordPress', 'Elementor Page Builder']
+    },
+    {
+      id: 'it-certifications',
+      title: 'IT Certifications',
+      items: ['Amazon AWS', 'AWS Certified Cloud Practitioner', 'AZ-900: Microsoft Azure Fundamentals', 'AWS Certified Solutions Architect - Associate', 'Kubernetes']
+    },
+    {
+      id: 'leadership',
+      title: 'Leadership',
+      items: ['Leadership', 'Management Skills', 'Project Management', 'Personal Productivity', 'Emotional Intelligence']
+    },
+    {
+      id: 'certifications-by-skill',
+      title: 'Certifications by Skill',
+      items: ['Cybersecurity Certification', 'Project Management Certification', 'Cloud Certification', 'Data Analytics Certification', 'HR Management Certification', 'See all Certifications']
+    },
+    {
+      id: 'data-science',
+      title: 'Data Science',
+      items: ['Data Science', 'Python', 'Machine Learning', 'ChatGPT', 'Deep Learning']
+    },
+    {
+      id: 'communication',
+      title: 'Communication',
+      items: ['Communication Skills', 'Presentation Skills', 'Public Speaking', 'Writing', 'PowerPoint']
+    },
+    {
+      id: 'business-analytics',
+      title: 'Business Analytics & Intelligence',
+      items: ['Microsoft Excel', 'SQL', 'Microsoft Power BI', 'Data Analysis', 'Business Analysis']
+    }
+  ];
+
   return (
     <footer className="footer">
       {/* NEW SECTION - Skills & Certifications */}
@@ -8,143 +65,86 @@ const Footer = () => {
         <h2 className="skills-maain-title">Explore top skills and certifications</h2>
         
         <div className="skills-grid">
-          {/* In-demand Careers */}
-          <div className="skills-category">
-            <h3 className="category-title">In-demand Careers</h3>
-            <ul className="category-links">
-              <li>Data Scientist</li>
-              <li>Full Stack Web Developer</li>
-              <li>Cloud Engineer</li>
-              <li>Project Manager</li>
-              <li>Game Developer</li>
-              <li>All Career Accelerators</li>
-            </ul>
-          </div>
-{/* WordPress Development */}
-<div className="skills-category">
-  <h3 className="category-title">Web Development</h3>
-  <ul className="category-links">
-    <li>WordPress Development</li>
-    <li>WordPress Theme Development</li>
-    <li>WordPress Plugin Development</li>
-    <li>WooCommerce Development</li>
-    <li>PHP for WordPress</li>
-    <li>Elementor Page Builde</li>
-  </ul>
-</div>
-
-          {/* IT Certifications */}
-          <div className="skills-category">
-            <h3 className="category-title">IT Certifications</h3>
-            <ul className="category-links">
-              <li>Amazon AWS</li>
-              <li>AWS Certified Cloud Practitioner</li>
-              <li>AZ-900: Microsoft Azure Fundamentals</li>
-              <li>AWS Certified Solutions Architect - Associate</li>
-              <li>Kubernetes</li>
-            </ul>
-          </div>
-
-          {/* Leadership */}
-          <div className="skills-category">
-            <h3 className="category-title">Leadership</h3>
-            <ul className="category-links">
-              <li>Leadership</li>
-              <li>Management Skills</li>
-              <li>Project Management</li>
-              <li>Personal Productivity</li>
-              <li>Emotional Intelligence</li>
-            </ul>
-          </div>
-
-          {/* Certifications by Skill */}
-          <div className="skills-category">
-            <h3 className="category-title">Certifications by Skill</h3>
-            <ul className="category-links">
-              <li>Cybersecurity Certification</li>
-              <li>Project Management Certification</li>
-              <li>Cloud Certification</li>
-              <li>Data Analytics Certification</li>
-              <li>HR Management Certification</li>
-              <li>See all Certifications</li>
-            </ul>
-          </div>
-
-          {/* Data Science */}
-          <div className="skills-category">
-            <h3 className="category-title">Data Science</h3>
-            <ul className="category-links">
-              <li>Data Science</li>
-              <li>Python</li>
-              <li>Machine Learning</li>
-              <li>ChatGPT</li>
-              <li>Deep Learning</li>
-            </ul>
-          </div>
-
-          {/* Communication */}
-          <div className="skills-category">
-            <h3 className="category-title">Communication</h3>
-            <ul className="category-links">
-              <li>Communication Skills</li>
-              <li>Presentation Skills</li>
-              <li>Public Speaking</li>
-              <li>Writing</li>
-              <li>PowerPoint</li>
-            </ul>
-          </div>
-
-          {/* Business Analytics & Intelligence */}
-          <div className="skills-category">
-            <h3 className="category-title">Business Analytics & Intelligence</h3>
-            <ul className="category-links">
-              <li>Microsoft Excel</li>
-              <li>SQL</li>
-              <li>Microsoft Power BI</li>
-              <li>Data Analysis</li>
-              <li>Business Analysis</li>
-            </ul>
-          </div>
+          {skillsCategories.map((category) => (
+            <div className="skills-category" key={category.id}>
+              {/* Desktop View - Always open */}
+              <h3 className="category-title desktop-view">{category.title}</h3>
+              
+              {/* Mobile View - Collapsible */}
+              <div 
+                className="mobile-category-header" 
+                onClick={() => toggleCategory(category.id)}
+              >
+                <h3 className="category-title mobile-view">{category.title}</h3>
+                <span className="dropdown-arrow">
+                  {openCategories[category.id] ? '−' : '+'}
+                </span>
+              </div>
+              
+              {/* Desktop Links */}
+              <ul className="category-links desktop-view">
+                {category.items.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+              
+              {/* Mobile Links - Collapsible */}
+              <ul className={`category-links mobile-view ${openCategories[category.id] ? 'open' : ''}`}>
+                {category.items.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* EXISTING FOOTER CONTENT */}
       <div className="footer-copyright">
-        <p>© 2025 iTechSkill. All rights reserved.</p>
+        <p>© 2026 iTechSkill. All rights reserved.</p>
         <p className="footer-tagline">Empowering the next generation of tech professionals</p>
       </div>
       
       <div className="footer-links">
         <div className="company-section">
-          <p className="company-title">Company</p>
+          <h3 className="company-title">Company</h3>
           <ul className="company-links">
-            <li>About Us</li>
-            <li>Careers</li>
-            <li>Contact</li>
-            <li>Blog</li>
+            <li><Link to="/AboutUs">About Us</Link></li>
+            <li><Link to="/Careers">Careers</Link></li>
+            <li><Link to="/Contact">Contact</Link></li>
+            <li>Blogs</li>
           </ul>
         </div>
         
         <div className="learning-section">
-          <p className="learning-title">Learning</p>
+          <h3 className="learning-title">Learning</h3>
           <ul className="learning-links">
-            <li>All Courses</li>
-            <li>Instructors</li>
-            <li>Categories</li>
-            <li>Certifications</li>
+            <li><Link to="/All_Courses">All Courses</Link></li>
+            <li><Link to="/Categories">Categories</Link></li>
+            <li><Link to="/Certification">Certifications</Link></li>
           </ul>
         </div>
         
         <div className="support-section">
-          <p className="support-title">Support</p>
+          <div 
+            className="support-title"
+            style={{
+              display: 'block',
+              color: '#ffffff',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              marginBottom: '20px',
+              textAlign:'left',
+            }}
+          >
+            Support
+          </div>
           <ul className="support-links">
-            <li>Help Center</li>
-            <li>FAQ</li>
-            <li>Terms</li>
-            <li>Privacy</li>
+            <li><Link to="/HelpCenter">Help Center</Link></li>
+            <li><Link to="/FAQ">FAQ</Link></li>
+            <li><Link to="/Terms">Terms</Link></li>
+            <li><Link to="/Privacy">Privacy</Link></li>
           </ul>
         </div>
-       
       </div>
     </footer>
   );

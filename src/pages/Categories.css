@@ -1,0 +1,621 @@
+/* Categories.css - Page-specific styles ONLY for Categories component */
+
+.categories-container {
+  overflow-x: hidden;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Hero Section - Specific to Categories */
+.categories-hero-section.full-width {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  background: linear-gradient(135deg, #2a043b 20%, #868528 100%);
+  padding: 80px 0;
+  margin-bottom: 40px;
+}
+
+.categories-hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
+  color: white;
+}
+
+.categories-hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.categories-hero-subtitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 25px;
+  opacity: 0.9;
+}
+
+.categories-hero-description {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  opacity: 0.95;
+}
+
+/* Section Styles */
+.categories-section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #22013a;
+  margin-bottom: 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #22013a 20%, #8e5203 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.categories-section-description {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #555;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 40px;
+}
+
+.categories-section-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 50px;
+  line-height: 1.6;
+}
+
+/* Find Your Path Section */
+.categories-find-path-section {
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 60px 40px;
+  margin: 40px 0;
+}
+
+.categories-career-paths-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 50px auto 0;
+}
+
+.categories-career-path-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.categories-career-path-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #22013a;
+}
+
+.categories-path-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 2rem;
+  color: white;
+}
+
+.categories-path-title {
+  font-size: 1.4rem;
+  color: #22013a;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.categories-path-description {
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.categories-path-courses {
+  color: #8e5203;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Categories Grid Section */
+.categories-grid-section {
+  padding: 60px 20px;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.categories-category-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column; /* Make card a flex container */
+  height: 100%; /* Ensure all cards take full height */
+}
+
+.categories-category-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: #22013a;
+}
+
+.categories-category-header {
+  padding: 25px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.categories-category-icon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+
+.categories-category-title-wrapper {
+  flex: 1;
+}
+
+.categories-category-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  line-height: 1.2;
+}
+
+.categories-course-count {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.categories-category-content {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow content to grow and fill space */
+}
+
+
+.categories-category-description {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+.categories-subcategories {
+  margin-bottom: 20px;
+  flex-grow: 1; /* Allow subcategories to grow */
+  min-height: 180px; /* Set minimum height for consistency */
+}
+
+.categories-subcategories-title {
+  font-size: 1.1rem;
+  color: #22013a;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.categories-subcategories-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.categories-subcategory-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.categories-subcategory-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.categories-subcategory-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.categories-subcategory-desc {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.categories-category-actions {
+  margin-top: auto; /* Push the button to the bottom */
+  padding-top: 20px;
+}
+
+.categories-view-courses-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #22013a;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.categories-view-courses-btn:hover {
+  background: #2a0250;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(34, 1, 58, 0.2);
+}
+
+.categories-btn-icon {
+  font-size: 0.9rem;
+}
+
+/* Popular Categories */
+.categories-popular-categories-section {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+  border-radius: 12px;
+  padding: 60px 40px;
+  margin: 40px 0;
+}
+
+.categories-popular-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 40px auto 0;
+}
+
+.categories-popular-category {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.categories-popular-category:hover {
+  transform: translateY(-5px);
+}
+
+.categories-popular-category-icon {
+  font-size: 2.5rem;
+  color: #22013a;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.categories-popular-category-content {
+  flex: 1;
+}
+
+.categories-popular-category-content h3 {
+  font-size: 1.4rem;
+  color: #22013a;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.categories-popular-category-content p {
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.categories-popular-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #22013a;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: gap 0.3s ease;
+}
+
+.categories-popular-link:hover {
+  gap: 12px;
+}
+
+.categories-popular-link svg {
+  font-size: 0.9rem;
+}
+
+/* How to Choose Section */
+.categories-choose-section {
+  background: white;
+  border-radius: 12px;
+  padding: 60px 40px;
+  margin: 40px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.categories-choose-title {
+  font-size: 2.2rem;
+  color: #22013a;
+  text-align: center;
+  margin-bottom: 50px;
+  font-weight: 700;
+}
+
+.categories-choose-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto 50px;
+}
+
+.categories-choose-step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.categories-step-number {
+  width: 50px;
+  height: 50px;
+  background: #22013a;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.categories-step-content h3 {
+  font-size: 1.3rem;
+  color: #22013a;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.categories-step-content p {
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* CTA Section */
+.categories-cta-section.full-width {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #2a043b 20%, #868528 100%);
+  padding: 80px 0;
+  margin: 40px 0;
+  overflow-x: hidden;
+}
+
+.categories-cta-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
+  color: white;
+  box-sizing: border-box;
+}
+
+.categories-cta-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.categories-cta-description {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto 40px;
+  opacity: 0.95;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.categories-primary-cta-btn,
+.categories-secondary-cta-btn {
+  padding: 16px 35px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.categories-primary-cta-btn {
+  background: #f9f493;
+  color: #22013a;
+  border: none;
+}
+
+.categories-primary-cta-btn:hover {
+  background: #ffdd57;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(249, 244, 147, 0.3);
+}
+
+.categories-secondary-cta-btn {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.categories-secondary-cta-btn:hover {
+  background: white;
+  color: #22013a;
+  transform: translateY(-3px);
+}
+
+.categories-cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.categories-cta-features {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.categories-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  color: white;
+}
+
+.categories-feature-icon {
+  font-size: 1.2rem;
+  color: #f9f493;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .categories-popular-categories {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .categories-hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .categories-hero-subtitle {
+    font-size: 1.8rem;
+  }
+  
+  .categories-hero-description {
+    font-size: 1.1rem;
+  }
+  
+  .categories-section-title {
+    font-size: 2rem;
+  }
+  
+  .categories-grid-section,
+  .categories-popular-categories-section,
+  .categories-choose-section {
+    padding: 40px 20px;
+  }
+  
+  .categories-career-paths-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .categories-choose-steps {
+    grid-template-columns: 1fr;
+  }
+  
+  .categories-cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .categories-primary-cta-btn,
+  .categories-secondary-cta-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .categories-cta-features {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-hero-title {
+    font-size: 2rem;
+  }
+  
+  .categories-container {
+    padding: 10px;
+  }
+  
+  .categories-category-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .categories-popular-category {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .categories-choose-step {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+}

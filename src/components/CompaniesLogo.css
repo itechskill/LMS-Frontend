@@ -1,55 +1,59 @@
-/* src/components/CompaniesLogo.css */
-
 /* ========== LOGOS & REVIEWS SECTION ========== */
 .logos-reviews-section {
-  padding: 20px 20px;
+  width: 100%;
+  padding: 50px 20px;
   background: #e6ecf0;
-  max-width: 1400px;
-  margin: 30px auto 0;
-  border-radius: 30px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: 30px;
+  /* margin-bottom:3 0px; */
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 15px;
 }
 
 .trusted-section-title {
-  font-size: 2.8rem;
-  font-weight: 700;
+  font-size: 3.2rem;
+  font-weight: 800;
   margin-bottom: 20px;
   color: #22013a;
-  background: linear-gradient(135deg, #22013a 20%, #8e5203 100%);
+  background: linear-gradient(135deg, #22013a 0%, #8e5203 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.1;
 }
 
 .trusted-section-subtitle {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   color: #383737;
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1;
+  font-weight: 400;
+  padding-top: 5px;
 }
 
 .logos-single-row-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 20px 0 30px;
-  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 20px 0;
 }
 
+/* Main logos row - Desktop view */
 .logos-single-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   align-items: center;
+  gap: 5px; /* Reduced gap */
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto 20px;
-  padding: 10px 10px;
-  gap: 0;
+  margin: 0 auto 30px;
+  padding: 20px 15px;
 }
 
 /* Logo container styling */
@@ -57,79 +61,290 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  min-width: 0;
-  height: 120px;
-  padding: 0 5px;
+  height: 160px; /* Increased height */
+  padding: 15px; /* Increased padding */
   background: transparent;
+  transition: all 0.3s ease;
+  border-radius: 8px;
 }
 
-/* Logo images */
+.logo-item-single:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo images - BIGGER SIZE */
 .logo-item-single img {
   width: auto;
-  height: 100%;
-  max-width: 90%;
-  max-height: 100px;
+  height: auto;
+  max-width: 100%;
+  max-height: 120px; /* Increased max height */
   object-fit: contain;
+  filter: grayscale(0%);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.logo-item-single:hover img {
+  transform: scale(1.05);
+  filter: brightness(1.1);
 }
 
 .companies-label {
-  font-size: 1.2rem;
-  color: #666;
+  font-size: 1.3rem;
+  color: #555;
   text-align: center;
-  margin-top: 15px;
-  font-weight: 500;
-  max-width: 800px;
+  margin-top: 40px;
+  font-weight: 600;
+  max-width: 900px;
   line-height: 1.6;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
 }
 
-/* Even BIGGER on large screens */
-@media (min-width: 1400px) {
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Large Desktop (1600px+) */
+@media (min-width: 1600px) {
+  .logos-reviews-section {
+    padding: 70px 60px;
+  }
+  
+  .logos-single-row {
+    max-width: 1600px;
+    gap: 10px;
+    padding: 40px 20px;
+  }
+  
+  .logo-item-single {
+    height: 180px;
+  }
+  
+  .logo-item-single img {
+    max-height: 140px;
+  }
+}
+
+/* Desktop (1400px - 1599px) */
+@media (max-width: 1599px) and (min-width: 1400px) {
+  .logos-single-row {
+    gap: 8px;
+  }
+  
+  .logo-item-single {
+    height: 170px;
+  }
+  
+  .logo-item-single img {
+    max-height: 130px;
+  }
+}
+
+/* Desktop (1200px - 1399px) */
+@media (max-width: 1399px) and (min-width: 1200px) {
+  .logos-single-row {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    padding: 25px 10px;
+  }
+  
+  .trusted-section-title {
+    font-size: 2.8rem;
+  }
+  
+  .logo-item-single {
+    height: 150px;
+  }
+  
+  .logo-item-single img {
+    max-height: 110px;
+  }
+}
+
+/* Tablet Landscape (992px - 1199px) */
+@media (max-width: 1199px) and (min-width: 992px) {
+  .logos-reviews-section {
+    padding: 45px 25px;
+  }
+  
+  .logos-single-row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 50px;
+    padding: 25px 15px;
+  }
+  
+  .trusted-section-title {
+    font-size: 2.5rem;
+  }
+  
+  .trusted-section-subtitle {
+    font-size: 1.3rem;
+  }
+  
   .logo-item-single {
     height: 140px;
   }
   
   .logo-item-single img {
-    max-height: 120px;
+    max-height: 100px;
+  }
+  
+  .companies-label {
+    font-size: 1.2rem;
   }
 }
 
-/* Tablet - make logos smaller */
-@media (max-width: 992px) {
+/* Tablet Portrait (768px - 991px) */
+@media (max-width: 991px) and (min-width: 768px) {
+  .logos-reviews-section {
+    padding: 40px 20px;
+  }
+  
   .logos-single-row {
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 45px;
+    padding: 20px 10px;
+  }
+  
+  .trusted-section-title {
+    font-size: 2.2rem;
+  }
+  
+  .trusted-section-subtitle {
+    font-size: 1.2rem;
+    max-width: 800px;
   }
   
   .logo-item-single {
-    flex: 0 0 calc(33.33% - 10px);
-    height: 100px;
-    margin: 5px 0;
+    height: 130px;
+  }
+  
+  .logo-item-single img {
+    max-height: 90px;
+  }
+  
+  .companies-label {
+    font-size: 1.1rem;
+    margin-top: 35px;
+  }
+}
+
+/* Mobile Large (576px - 767px) */
+@media (max-width: 767px) and (min-width: 576px) {
+  .logos-reviews-section {
+    padding: 35px 15px;
+  }
+  
+  .section-header {
+    margin-bottom: 35px;
+  }
+  
+  .logos-single-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 35px;
+    padding: 20px 10px;
+  }
+  
+  .trusted-section-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  .trusted-section-subtitle {
+    font-size: 1.1rem;
+    max-width: 700px;
+  }
+  
+  .logo-item-single {
+    height: 120px;
+    padding: 12px;
   }
   
   .logo-item-single img {
     max-height: 80px;
   }
+  
+  .companies-label {
+    font-size: 1rem;
+    margin-top: 30px;
+    line-height: 1.5;
+  }
 }
 
-/* Mobile */
-@media (max-width: 768px) {
+/* Mobile Medium (480px - 575px) */
+@media (max-width: 575px) and (min-width: 480px) {
   .logos-reviews-section {
-    padding: 20px 15px;
+    padding: 30px 12px;
+  }
+  
+  .logos-single-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 30px;
+    padding: 15px 8px;
   }
   
   .trusted-section-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
-  .logos-single-row-container {
-    margin: 30px 0 40px;
+  .trusted-section-subtitle {
+    font-size: 1.05rem;
+    max-width: 600px;
   }
   
   .logo-item-single {
-    flex: 0 0 calc(50% - 10px);
-    height: 80px;
+    height: 110px;
+    padding: 10px;
+  }
+  
+  .logo-item-single img {
+    max-height: 70px;
+  }
+  
+  .companies-label {
+    font-size: 0.95rem;
+    margin-top: 25px;
+  }
+}
+
+/* Mobile Small (below 480px) */
+@media (max-width: 479px) {
+  .logos-reviews-section {
+    padding: 25px 10px;
+  }
+  
+  .section-header {
+    margin-bottom: 30px;
+    padding: 0 10px;
+  }
+  
+  .logos-single-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px 12px;
+    margin-bottom: 25px;
+    padding: 15px 5px;
+  }
+  
+  .trusted-section-title {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+  }
+  
+  .trusted-section-subtitle {
+    font-size: 1rem;
+    max-width: 500px;
+    line-height: 1.5;
+  }
+  
+  .logo-item-single {
+    height: 100px;
+    padding: 8px;
   }
   
   .logo-item-single img {
@@ -137,15 +352,31 @@
   }
   
   .companies-label {
-    font-size: 1rem;
+    font-size: 0.9rem;
+    margin-top: 20px;
+    padding: 0 15px;
+    line-height: 1.4;
   }
 }
 
-/* Tiny mobile */
-@media (max-width: 480px) {
+/* Extra Small Mobile (below 360px) */
+@media (max-width: 359px) {
+  .logos-single-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 8px;
+    padding: 10px 5px;
+  }
+  
+  .trusted-section-title {
+    font-size: 1.4rem;
+  }
+  
+  .trusted-section-subtitle {
+    font-size: 0.9rem;
+  }
+  
   .logo-item-single {
-    flex: 0 0 calc(50% - 5px);
-    height: 70px;
+    height: 90px;
   }
   
   .logo-item-single img {

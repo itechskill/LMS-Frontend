@@ -6,55 +6,51 @@ import comptiaImage from '../assets/comptia.png';
 import awsImage from '../assets/aws.png';
 import pmiImage from '../assets/pmi.png';
 import report from '../assets/report.png';
-import { FaChevronLeft, FaChevronRight, FaRobot, FaCertificate, FaChartLine, FaLaptopCode, FaCloud, FaDatabase, FaCheck, FaPlay, FaYoutube, FaUsers, FaBuilding, FaBrain } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaRobot, FaCertificate, FaChartLine, FaLaptopCode, FaCloud, FaDatabase, FaCheck, FaPlay, FaYoutube, } from 'react-icons/fa';
 import Footer from '../components/Footer'; // ✅ Go up one level, then into components
 import '../components/Footer.css'; // ✅ If Footer.css is with Footer.js
 import PlanPrice from '../components/PlanPrice'; // ✅
 import CompaniesLogo from '../components/CompaniesLogo';
 import Review from '../components/Review';
-import Navbar from '../components/Navbar';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 
 const YouTubeRecommendations = () => {
-const [currentIndex, setCurrentIndex] = useState(0);
-const [lectureIndex, setLectureIndex] = useState(0);
-const [trendingIndex, setTrendingIndex] = useState(0);
-const carouselRef = useRef(null);
-const lectureCarouselRef = useRef(null);
-const autoPlayRef = useRef(null);
+  useScrollToTop();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [lectureIndex, setLectureIndex] = useState(0);
+  const [trendingIndex, setTrendingIndex] = useState(0); // ✅ Fixed
+  const [trendingCardsPerView, setTrendingCardsPerView] = useState(4);
+  const [isMobile, setIsMobile] = useState(false);
+  const [demoCardsPerView, setDemoCardsPerView] = useState(4);
+  const [demoIndex, setDemoIndex] = useState(0); // ✅ Moved here
+  const carouselRef = useRef(null);
+  const lectureCarouselRef = useRef(null);
 
-const [demoIndex, setDemoIndex] = useState(0);
-const demoCardsPerView = 4;
-//const demoMaxIndex = Math.max(0, demoLectures.length - demoCardsPerView);
- const logoContainerStyle = {
-    flex: '1',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '140px',
-    padding: '0 2px',
-    minWidth: '0',
-    maxWidth: '200px'
-  };
 
-  const logoImageStyle = {
-    width: 'auto',
-    height: '120px',
-    maxWidth: '100%',
-    objectFit: 'contain'
-  };
-
-  const logosRowStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: '1400px',
-    margin: '0 auto 30px',
-    padding: '20px 0',
-    gap: '0'
-  };
-
-  // Skills & Certifications Data
+ useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      
+      // Set different cards per view based on screen size
+      if (window.innerWidth <= 480) {
+        setDemoCardsPerView(1);
+        setTrendingCardsPerView(1); // Add this
+      } else if (window.innerWidth <= 768) {
+        setDemoCardsPerView(2);
+        setTrendingCardsPerView(2); // Add this
+      } else if (window.innerWidth <= 1024) {
+        setDemoCardsPerView(3);
+        setTrendingCardsPerView(3); // Add this
+      } else {
+        setDemoCardsPerView(4);
+        setTrendingCardsPerView(4); // Add this
+      }
+    };
+     handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const skillsData = [
     {
       id: 1,
@@ -63,7 +59,7 @@ const demoCardsPerView = 4;
       icon: <FaRobot className="skill-icon" />,
       color: "#22013a",
       coursesCount: "12+ courses",
-      // link: "/courses?category=ai"
+      // link: "/All_Courses",
     },
     {
       id: 2,
@@ -72,7 +68,7 @@ const demoCardsPerView = 4;
       icon: <FaCertificate className="skill-icon" />,
       color: "#8e5203",
       coursesCount: "8+ certifications",
-      // link: "/courses?category=certifications"
+      link: "/courses?category=certifications"
     },
     {
       id: 3,
@@ -175,7 +171,7 @@ const demoCardsPerView = 4;
       thumbnail: "https://i.ytimg.com/vi/vTJXbtQ9odY/hqdefault.jpg"
     }
   ];
-const demoMaxIndex = Math.max(0, demoLectures.length - demoCardsPerView);
+const demoMaxIndex = Math.max(0, demoLectures.length - (demoCardsPerView || 1));
 // Update the trendingCourses array (around line 150-155)
 const trendingCourses = [
   {
@@ -259,9 +255,8 @@ const certificationsData = [
     logoWidth: "250px"
   }
 ];
-
-  const cardsPerView = 2;
-  const maxIndex = Math.ceil(skillsData.length / cardsPerView) - 1;
+const cardsPerView = isMobile ? 1 : 2;
+const maxIndex = Math.ceil(skillsData.length / cardsPerView) - 1;
   
   const lectureCardsPerView = 4;
   const lectureMaxIndex = Math.max(0, Math.ceil(demoLectures.length / lectureCardsPerView) - 1);
@@ -270,7 +265,7 @@ const nextSlide = () => {
   setCurrentIndex(prev => {
     const newIndex = prev + 1;
     if (newIndex > maxIndex) {
-      return prev; // Don't go beyond max
+      return prev;
     }
     return newIndex;
   });
@@ -280,7 +275,7 @@ const prevSlide = () => {
   setCurrentIndex(prev => {
     const newIndex = prev - 1;
     if (newIndex < 0) {
-      return prev; // Don't go below 0
+      return prev;
     }
     return newIndex;
   });
@@ -323,8 +318,8 @@ const prevDemoSlide = () => {
     return newIndex;
   });
 };
-const trendingCardsPerView = 4;
-const trendingMaxIndex = trendingCourses.length - trendingCardsPerView;
+
+  const trendingMaxIndex = trendingCourses.length - trendingCardsPerView;
 
 const nextTrendingSlide = () => {
   setTrendingIndex(prev => {
@@ -355,21 +350,12 @@ const handleLectureClick = (link) => {
   window.open(link, '_blank');
 };
 
-const handleCarouselHover = (isHovering) => {
-  if (autoPlayRef.current) {
-    clearInterval(autoPlayRef.current);
-  }
-  
-  if (!isHovering) {
-    autoPlayRef.current = setInterval(() => {
-      nextLectureSlide();
-    }, 5000);
-  }
-};
+
 
 
 
   return (
+    
     <div className="youtube-recommendations-container">
       {/* Purple Recommendation Box */}
       <div className="purple-recommendation-box full-width">
@@ -408,18 +394,17 @@ const handleCarouselHover = (isHovering) => {
           <div className="skills-carousel-container">
             <div className="carousel-wrapper">
               <div className="skills-carousel" ref={carouselRef}>
-                <div 
-                  className="skills-carousel-track"
-                  style={{ 
-                    transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`
-                  }}
-                >
+               <div 
+  className="skills-carousel-track"
+  style={{ 
+    transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`
+  }}
+>
                   {skillsData.map((skill) => (
                     <div 
                       key={skill.id} 
                       className="skill-card"
-                      // onClick={() => handleSkillClick(skill)}
-                    >
+                       >
                       <div className="skill-card-header" style={{ backgroundColor: skill.color }}>
                         <div className="skill-icon-container">
                           {skill.icon}
@@ -434,23 +419,22 @@ const handleCarouselHover = (isHovering) => {
                           <span className="courses-count">{skill.coursesCount}</span>
                         </div>
                         
-                        <button 
-                          className="explore-button"
-                          // onClick={(e) => {
-                          //   e.stopPropagation();
-                          //   handleSkillClick(skill);
-                          // }}
-                          style={{ backgroundColor: skill.color }}
-                        >
-                          Explore
-                        </button>
+                     <button 
+  className="explore-button"
+  onClick={(e) => {
+    window.location.href = "/courses";
+  }}
+  style={{ backgroundColor: skill.color }}
+>
+  Explore
+</button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
               
-    <div className="carousel-controls">
+ <div className="carousel-controls">
   {currentIndex > 0 && (
     <button 
       className="carousel-arrow left-arrow"
@@ -492,10 +476,10 @@ const handleCarouselHover = (isHovering) => {
         <div className="ai-era-container">
           <div className="ai-era-content">
             <h2 className="ai-era-title">
-              Transform Your Career with iTechSkill AI Mastery
+              Transform Your Career with iTechSkills AI Mastery
             </h2>
             <p className="ai-era-subtitle">
-              Future-proof your expertise with iTechSkill Personal Pro Plan. Access exclusive content crafted by industry-leading AI experts.
+              Future-proof your expertise with iTechSkills Personal Pro Plan. Access exclusive content crafted by industry-leading AI experts.
             </p>
             
        <div className="ai-era-features">
@@ -531,7 +515,7 @@ const handleCarouselHover = (isHovering) => {
             <div className="image-placeholder">
               <img 
                 src={aiiImage} 
-                alt="iTechSkill AI Platform" 
+                alt="iTechSkills AI Platform" 
                 className="ai-platform-image"
                 onError={(e) => {
                   e.target.onerror = null;
@@ -564,24 +548,34 @@ const handleCarouselHover = (isHovering) => {
   </div>
 
   <div className="demo-lectures-carousel-wrapper">
-    {demoIndex > 0 && (
-      <button 
-        className="demo-lectures-arrow left"
-        onClick={prevDemoSlide}
-        aria-label="Previous demo lectures"
-      >
-        <FaChevronLeft />
-      </button>
-    )}
+{demoIndex > 0 && (
+  <button 
+    className="demo-lectures-arrow left"
+    onClick={prevDemoSlide}
+    aria-label="Previous demo lectures"
+  >
+    <FaChevronLeft />
+  </button>
+)}
 
-    <div 
-      className="demo-lectures-track"
-      style={{
-        transform: `translateX(-${demoIndex * (100 / demoCardsPerView)}%)`,
-        transition: 'transform 0.5s ease'
-      }}
-    >
-      {demoLectures.map((lecture) => (
+{/* Change this condition */}
+{demoIndex < demoMaxIndex && (
+  <button 
+    className="demo-lectures-arrow right"
+    onClick={nextDemoSlide}
+    aria-label="Next demo lectures"
+  >
+    <FaChevronRight />
+  </button>
+)}
+
+   <div 
+  className="demo-lectures-track"
+  style={{
+    transform: `translateX(-${demoIndex * (100 / demoCardsPerView)}%)`,
+    transition: 'transform 0.5s ease'
+  }}
+>{demoLectures.map((lecture) => (
         <div 
           key={lecture.id} 
           className="demo-lecture-card"
@@ -697,14 +691,15 @@ const handleCarouselHover = (isHovering) => {
         <FaChevronLeft />
       </button>
     )}
+<div 
+  className="trending-courses-track"
+  style={{
+    transform: `translateX(-${trendingIndex * (100 / trendingCardsPerView)}%)`,
+    transition: 'transform 0.5s ease',
+    '--cards-per-view': trendingCardsPerView // Add this line
+  }}
+>
 
-    <div 
-      className="trending-courses-track"
-      style={{
-        transform: `translateX(-${trendingIndex * (100 / trendingCardsPerView)}%)`,
-        transition: 'transform 0.5s ease'
-      }}
-    >
       {trendingCourses.map((course, index) => (
         <div 
           key={`${course.id}-${index}`}
@@ -825,15 +820,15 @@ const handleCarouselHover = (isHovering) => {
         <h3 className="category-tiitle">Development</h3>
         <ul className="category-skills-list">
           <li className="skill-link-item">
-           Python
+            <a href="/topic/python" className="skill-link">Python</a>
             <p className="skill-learners-count">50,176,801 learners</p>
           </li>
           <li className="skill-link-item">
-            Web Development
+            <a href="/topic/web-development" className="skill-link">Web Development</a>
             <p className="skill-learners-count">14,475,692 learners</p>
           </li>
           <li className="skill-link-item">
-            Data Science
+            <a href="/topic/data-science" className="skill-link">Data Science</a>
             <p className="skill-learners-count">8,338,020 learners</p>
           </li>
         </ul>
@@ -844,15 +839,15 @@ const handleCarouselHover = (isHovering) => {
         <h3 className="category-tiitle">Design</h3>
         <ul className="category-skills-list">
           <li className="skill-link-item">
-            Blender
+            <a href="/topic/blender" className="skill-link">Blender</a>
             <p className="skill-learners-count">3,108,331 learners</p>
           </li>
           <li className="skill-link-item">
-            Graphic Design
+            <a href="/topic/graphic-design" className="skill-link">Graphic Design</a>
             <p className="skill-learners-count">4,687,243 learners</p>
           </li>
           <li className="skill-link-item">
-            User Experience (UX) Design
+            <a href="/topic/ux-design" className="skill-link">User Experience (UX) Design</a>
             <p className="skill-learners-count">2,150,373 learners</p>
           </li>
         </ul>
@@ -863,15 +858,15 @@ const handleCarouselHover = (isHovering) => {
         <h3 className="category-tiitle">Business</h3>
         <ul className="category-skills-list">
           <li className="skill-link-item">
-            PMI Project Management Professional (PMP)
+            <a href="/topic/pmp" className="skill-link">PMI Project Management Professional (PMP)</a>
             <p className="skill-learners-count">2,860,044 learners</p>
           </li>
           <li className="skill-link-item">
-            Microsoft Power BI
+            <a href="/topic/power-bi" className="skill-link">Microsoft Power BI</a>
             <p className="skill-learners-count">5,139,271 learners</p>
           </li>
           <li className="skill-link-item">
-            PMI Certified Associate in Project Management (CAPM)
+            <a href="/topic/capm" className="skill-link">PMI Certified Associate in Project Management (CAPM)</a>
             <p className="skill-learners-count">485,497 learners</p>
           </li>
         </ul>

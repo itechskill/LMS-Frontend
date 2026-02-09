@@ -1,117 +1,5 @@
-// import React, { useState } from 'react';
-// import { FiSearch, FiUser } from 'react-icons/fi';
-// import { FaShoppingCart } from 'react-icons/fa';
-// import './Navbar.css';
-// import logo from '../assets/logo.jpeg';
-// import { Link, useNavigate, useLocation } from 'react-router-dom';
-
-// const Navbar = () => {
-//   const [searchQuery, setSearchQuery] = useState('');
-//   const navigate = useNavigate();
-//   const location = useLocation();
-
-//   const handleLogoClick = (e) => {
-//     if (location.pathname === '/') {
-//       e.preventDefault();
-//       window.location.href = '/';
-//     }
-//   };
-
-//   const handleSearch = (e) => {
-//     e.preventDefault();
-//     console.log('Searching for:', searchQuery);
-//   };
-
-//   return (
-//     <nav className="navbar">
-//       <div className="navbar-container">
-        
-//         <Link 
-//           to="/" 
-//           className="navbar-logo" 
-//           style={{ textDecoration: 'none' }}
-//           onClick={handleLogoClick}
-//         >
-//           <img src={logo} alt="ITechSkill Logo" className="logo-image" />
-//           <span className="logo-text"><i>ITechSkill</i></span>
-//         </Link>
-
-//         <div className="nav-item">
-//           <Link 
-//             to="/courses" 
-//             className="nav-button courses-nav-button"
-//             style={{
-//               textDecoration: 'none',
-//               display: 'flex',
-//               alignItems: 'center',
-//               gap: '8px'
-//             }}
-//           >
-//             <span>Courses</span>
-//           </Link>
-//         </div>
-
-//         {/* Search Bar */}
-//         <div className="search-container">
-//           <form onSubmit={handleSearch} className="search-form">
-//             <div className="search-input-wrapper">
-//               <FiSearch className="search-icon" />
-//               <input
-//                 type="text"
-//                 placeholder="Search Anything...."
-//                 value={searchQuery}
-//                 onChange={(e) => setSearchQuery(e.target.value)}
-//                 className="search-input"
-//               />
-//             </div>
-//           </form>
-//         </div>
-
-//         {/* Right side navigation items */}
-//         <div className="nav-right">
-//           {/* Change button to Link */}
-//           <Link to="/pricing" className="nav-button pricing-button" style={{ textDecoration: 'none' }}>
-//             Pricing & Plans
-//           </Link>
-
-//           <button className="nav-button cart-button">
-//             <FaShoppingCart className="cart-icon" />
-//             <span className="cart-badge">3</span>
-//           </button>
-
-//           <button className="nav-button login-button">
-//             <FiUser className="login-icon" />
-//             <span>Login</span>
-//           </button>
-//           <button className="nav-button login-button">
-//             <FiUser className="login-icon" />
-//             <span>Signup</span>
-//           </button>
-//         </div>
-//       </div>
-//     </nav>
-//   );
-// };
-
-// export default Navbar;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useContext } from "react";
-import { FiSearch, FiUser } from "react-icons/fi";
-import { FaShoppingCart } from "react-icons/fa";
+import { FiSearch, FiUser, FiMenu, FiX, FiBookOpen, FiDollarSign, FiLogIn, FiUserPlus, FiLogOut } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
 import "./Navbar.css";
 import logo from "../assets/logo.jpeg";
@@ -119,15 +7,28 @@ import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log("Searching for:", searchQuery);
+    if (searchQuery.trim()) {
+      console.log("Searching for:", searchQuery);
+      // Add your search logic here
+    }
   };
 
-  // Hide navbar on login/register pages (optional but clean)
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Hide navbar on login/register pages
   if (location.pathname === "/login" || location.pathname === "/register") {
     return null;
   }
@@ -135,74 +36,168 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-
-        {/* LOGO */}
-        <Link to="/" className="navbar-logo" style={{ textDecoration: "none" }}>
-          <img src={logo} alt="ITechSkill Logo" className="logo-image" />
-          <span className="logo-text"><i>ITechSkill</i></span>
-        </Link>
-
-        {/* COURSES */}
-        <div className="nav-item">
-          <Link to="/courses_screen" className="nav-button courses-nav-button">
-            Courses
+        {/* LEFT SECTION - Logo (Circular with white bg) */}
+        <div className="navbar-left">
+          <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
+            <img 
+              src={logo} 
+              alt="ITechSkill Logo" 
+              className="logo-image" 
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://via.placeholder.com/50/ffffff/13032e?text=IT";
+              }}
+            />
+            <span className="logo-text">ITechSkill</span>
           </Link>
         </div>
 
-        {/* SEARCH */}
-        <div className="search-container">
-          <form onSubmit={handleSearch} className="search-form">
-            <div className="search-input-wrapper">
-              <FiSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search anything..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </div>
-          </form>
-        </div>
-
-        {/* RIGHT SIDE */}
-        <div className="nav-right">
-
-          <Link to="/pricing" className="nav-button pricing-button">
-            Pricing & Plans
+        {/* CENTER SECTION - Search Bar & Courses */}
+        <div className="navbar-center">
+          <Link
+            to="/courses_screen"
+            className="courses-nav-button desktop-only"
+            onClick={closeMobileMenu}
+          >
+            <FiBookOpen className="courses-icon" />
+            <span>Courses</span>
           </Link>
 
-          {/* <button className="nav-button cart-button">
-            <FaShoppingCart className="cart-icon" />
-            <span className="cart-badge">3</span>
-          </button> */}
+          <div className={`search-bar ${isSearchFocused ? "focused" : ""}`}>
+            <form onSubmit={handleSearch} className="search-form">
+              <div className="search-input-wrapper">
+                {/* <FiSearch className="search-icon" /> */}
+                <input
+                  type="text"
+                  placeholder="Search for courses, topics, skills..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  className="search-input"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
 
-          {/* AUTH ACTIONS */}
+        {/* RIGHT SECTION - Navigation Links */}
+        <div className="navbar-right">
+          {/* Desktop Navigation */}
+          <div className="nav-links desktop-only">
+            <Link to="/pricing" className="nav-link">
+              <FiDollarSign style={{ marginRight: "8px" }} />
+              Pricing
+            </Link>
+
+            {user ? (
+              <>
+                <div className="user-welcome">
+                  <span className="welcome-text">Welcome,</span>
+                  <span className="user-name">{user.fullName || user.name || "User"}</span>
+                </div>
+                <button onClick={logout} className="nav-button logout-button">
+                  <FiLogOut className="button-icon" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="nav-button login-button">
+                  <FiLogIn className="button-icon" />
+                  <span>Login</span>
+                </Link>
+
+                <Link to="/register" className="nav-button signup-button">
+                  <FiUserPlus className="button-icon" />
+                  <span>Sign Up</span>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="mobile-menu-toggle"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <div className={`mobile-menu ${isMobileMenuOpen ? "active" : ""}`}>
+        <div className="mobile-menu-content">
+          <Link
+            to="/courses_screen"
+            className="mobile-menu-item"
+            onClick={closeMobileMenu}
+          >
+            <FiBookOpen className="menu-item-icon" />
+            <span>Courses</span>
+          </Link>
+
+          <Link
+            to="/pricing"
+            className="mobile-menu-item"
+            onClick={closeMobileMenu}
+          >
+            <FiDollarSign className="menu-item-icon" />
+            <span>Pricing</span>
+          </Link>
+
+          <div className="mobile-divider"></div>
+
           {user ? (
             <>
-              <span className="nav-username">
-                Hi, {user.fullName || user.name}
-              </span>
-              <button onClick={logout} className="nav-button login-button">
-                Logout
+              <div className="mobile-user-info">
+                <FiUser className="user-icon" />
+                <div className="user-details">
+                  <span className="user-greeting">Welcome back!</span>
+                  <span className="user-name-mobile">{user.fullName || user.name || "User"}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  logout();
+                  closeMobileMenu();
+                }}
+                className="mobile-menu-button logout"
+              >
+                <FiLogOut style={{ marginRight: "8px" }} />
+                <span>Logout</span>
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="nav-button login-button">
-                <FiUser className="login-icon" />
-                Login
+              <Link
+                to="/login"
+                className="mobile-menu-button login"
+                onClick={closeMobileMenu}
+              >
+                <FiLogIn style={{ marginRight: "8px" }} />
+                <span>Login</span>
               </Link>
 
-              <Link to="/register" className="nav-button login-button">
-                <FiUser className="login-icon" />
-                Sign Up
+              <Link
+                to="/register"
+                className="mobile-menu-button signup"
+                onClick={closeMobileMenu}
+              >
+                <FiUserPlus style={{ marginRight: "8px" }} />
+                <span>Sign Up</span>
               </Link>
             </>
           )}
-
         </div>
       </div>
+
+      {/* Overlay for mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>
+      )}
     </nav>
   );
 };
